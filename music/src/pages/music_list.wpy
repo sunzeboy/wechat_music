@@ -1,0 +1,361 @@
+<style lang="less">
+.table {
+  border: 1px solid darkgray;
+}
+.tr {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  height: 1rem;
+  align-items: center;
+}
+.td {
+    width:40%;
+    justify-content: center;
+    text-align: center;
+    font-size: 20rpx;
+}
+.bg-w{
+  background: snow;
+}
+.bg-g{
+  background: #E6F3F9;
+}
+.th {
+  width: 40%;
+  justify-content: center;
+  background: #3366FF;
+  color: #fff;
+  display: flex;
+  height: 1rem;
+  align-items: center;
+}
+
+.audio {
+    width: 750rpx;
+    height: 250rpx;
+    padding: 10rpx 10rpx 10rpx;
+    box-sizing: border-box;
+    text-align: center;
+    overflow: hidden;
+    background: rgba(70, 29, 29, 0.18);
+}
+
+.audio .bg {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    bottom: 0;
+    right: 0;
+    margin: auto;
+    width: 300%;
+    height: 300%;
+    z-index: -1;
+    filter: blur(40rpx);
+    
+}
+.editor {
+    padding: 32rpx;
+    box-sizing: border-box;
+    color: #333;
+    font-size: 28rpx;
+    background: #fff;
+}
+.editor view {
+    max-width: 100% !important;
+}
+
+.audio .poster {
+    width: 238rpx;
+    height: 336rpx;
+}
+/* 音频滚动条start */
+.control-process {
+    margin-top: 20rpx;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.control-process .slider {
+    width: 526rpx;
+}
+.control-process text {
+    font-size: 24rpx;
+    color: #fff;
+}
+/* 音频滚动条end */
+.audio .icon-list {
+    position: relative;
+    margin: 0 auto;
+    line-height: 102rpx;
+}
+
+.audio .icon-list .audio-icon + .audio-icon {
+    margin-left: 72rpx;
+}
+
+.audio .icon-list .pattern {
+    position: absolute;
+    right: 20rpx;
+}
+
+.audio image {
+    width: 64rpx;
+    height: 64rpx;
+    vertical-align: middle;
+}
+
+.audio .audio-play {
+    width: 92rpx;
+    height: 92rpx;
+}
+
+.audio .pattern {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
+    width: 44rpx;
+    height: 44rpx;
+}
+.weui-footer_fixed-bottom{
+    bottom: 0%;
+}
+
+</style>
+
+<template>
+        <block wx:for-items="{{playlist}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+          <van-cell value="歌手：{{item.artist}}" size="large"  label="专辑：{{item.album}}" is-link>
+            <view slot="title">
+              <view class="van-cell-text">{{item.title}}</view>
+              <van-tag wx:if="{{index == selectedIndex}}" type="danger">播放中...</van-tag>
+            </view>
+          </van-cell>
+        </block>
+
+      <view class="audio weui-footer weui-footer_fixed-bottom">
+        <text>当前音乐:{{selectedName}}</text>
+        <view class="control-process">
+            <text class="current-process">{{current_process}}</text>
+            <slider class="slider" 
+                min="0" 
+                block-size="16" 
+                max="{{slider_max}}" 
+                activeColor="#fff" 
+                backgroundColor="rgba(255,255,255,.3)" 
+                @change="drag"
+                value="{{slider_value}}"/>
+            <text class="total-process">{{total_process}}</text>
+        </view>
+        <view class="icon-list ">
+            <image @tap="previous" mode="widthFix" src="{{is_first_page?'/resource/audio_prev_no.png':'/resource/audio_prev.png'}}" class="audio-icon"></image>
+            <image mode="widthFix" src="{{is_play == false? '/resource/audio_play.png': '/resource/audio_paused.png'}}" class="audio-icon audio-play" @tap="audio_play"></image>
+            <image @tap="next" mode="widthFix" src="{{is_last_page?'/resource/audio_next_no.png':'/resource/audio_next.png'}}" class="audio-icon"></image>
+        </view>
+    </view>
+    
+</template>
+
+<script>
+  import wepy from 'wepy'
+  export default class Music_list extends wepy.page {
+    config = {
+      navigationBarTitleText: '当前歌单',
+      usingComponents: {
+        'van-cell': '/styles/vant/cell/index',
+        'van-tag': '/styles/vant/tag/index'
+      }
+    }
+    components = {
+
+    }
+
+    data = {
+      backgroundAudioManager:Object,
+      selectedIndex:0,
+      playlist:[],
+      duration:'',
+      currentTime:'',
+      is_play:true
+    }
+
+    computed = {
+      selectedPoster () {
+          return ''
+      },
+      selectedName () {
+          return this.custom_selectedName()
+      },
+      selectedAuthor () {
+        return this.custom_selectedAuthor()
+      },
+      selectedUrl () {
+          return this.custom_selectedUrl()
+      },
+      playlistCount () {
+          return this.playlist.length;
+      },
+      current_process () {
+        return this.format(this.currentTime)
+      },
+      total_process () {
+        return this.format(this.duration)
+      },
+      slider_max () {
+        return Math.floor(this.duration)
+      },
+      slider_value () {
+        return Math.floor(this.currentTime)
+      },
+      is_first_page () {
+        return this.selectedIndex == 0
+      },
+      is_last_page () {
+        return this.selectedIndex == this.playlistCount-1
+      }
+    }
+
+    methods = {
+      drag (e) {
+        this.backgroundAudioManager.seek(e.detail.value)
+      },
+      previous () {
+        if (this.is_first_page) {
+          return
+        }
+        this.custom_previous()
+      },
+      next () {
+        if (this.is_last_page) {
+          return
+        }
+        this.custom_next()
+      },
+      onEnded () {
+          this.custom_next()
+      },
+      audio_play () {
+        if (this.is_play) 
+        {
+          this.backgroundAudioManager.pause()
+          this.is_play = false
+        } 
+        else 
+        {
+          this.backgroundAudioManager.play()
+          this.is_play = true
+        }
+      }
+    }
+    custom_selectedAuthor () {
+      if (this.playlist.length == 0) 
+      {
+        return ''
+      } 
+      else 
+      {
+        return this.playlist[this.selectedIndex].artist
+      }
+    }
+    custom_selectedName () {
+      if (this.playlist.length == 0) 
+      {
+        return ''
+      } 
+      else 
+      {
+        return this.playlist[this.selectedIndex].title
+      }
+    }
+    custom_selectedUrl () {
+      var httpUrl = "http://47.96.191.22/upload/music/"
+      if (this.playlist.length == 0) 
+      {
+        return ''
+      } 
+      else 
+      {
+        let fileid = this.playlist[this.selectedIndex].fileid
+        // console.log("selectedIndex:"+this.selectedIndex);
+        // console.log("fileid:"+fileid);
+        let a = fileid.substring(0,2)
+        let b = fileid.substring(2,4)
+        httpUrl = httpUrl + a + '/' + b + '/' + fileid + '.mp3'
+        // console.log(httpUrl);
+        return httpUrl
+      }
+    }
+    custom_next () {
+        if (this.selectedIndex == this.playlistCount - 1) 
+        {
+            this.selectedIndex = 0
+        } 
+        else 
+        {
+            this.selectedIndex  = this.selectedIndex + 1
+        }
+        this.custom_play()
+    }
+    custom_play () {
+      this.backgroundAudioManager.title = this.custom_selectedName()
+      this.backgroundAudioManager.singer = this.custom_selectedAuthor()
+      this.backgroundAudioManager.src = this.custom_selectedUrl()
+    }
+    custom_previous () {
+      if (this.selectedIndex == 0) 
+      {
+          this.selectedIndex = this.playlistCount - 1
+      } 
+      else 
+      {
+          this.selectedIndex = this.selectedIndex - 1
+      }
+      this.custom_play()
+    }
+    format(t) {
+        let time = Math.floor(t / 60) >= 10 ? Math.floor(t / 60) : '0' + Math.floor(t / 60)
+        t = time + ':' + ((t % 60) / 100).toFixed(2).slice(-2)
+        return t
+    }
+    onLoad() {
+        let self = this
+        this.backgroundAudioManager = wx.getBackgroundAudioManager()
+        this.backgroundAudioManager.onTimeUpdate(()=>{
+          self.duration = self.backgroundAudioManager.duration
+          self.currentTime = self.backgroundAudioManager.currentTime
+          self.$apply()
+        })
+        this.backgroundAudioManager.onEnded(()=>{
+          wepy.showToast({
+            title: '播放结束',
+          });
+          this.custom_next()
+        })
+        this.backgroundAudioManager.onNext(()=>{
+          wepy.showToast({
+            title: '下一首',
+          });
+          this.custom_next()
+        })
+        this.backgroundAudioManager.onPrev(()=>{
+          wepy.showToast({
+            title: '上一首',
+          });
+          this.custom_previous()
+        })
+        let sid = wepy.getStorageSync('sid') || 373
+        let url = 'http://47.96.191.22/client/index.php?m=bbc&c=index&a=s_playlist&p=json&sid=' + sid
+        wepy.request({  
+            url: url,  
+            data: {},  
+            method: 'GET',   
+            success: function(res){ 
+                self.playlist = res.data.items
+                self.$apply()
+                self.custom_play()
+            }  
+        });
+    }
+  }
+</script>

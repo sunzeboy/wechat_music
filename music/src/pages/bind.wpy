@@ -1,0 +1,133 @@
+<style lang="less">
+    
+</style>
+
+<template>
+    <view class="weui-cells weui-cells_after-title">
+        <view class="weui-cell weui-cell_input">
+            <view class="weui-cell__hd">
+                <view class="weui-label">手机号</view>
+            </view>
+            <view class="weui-cell__bd">
+                <input class="weui-input" @input="phoneNumChange" type="number" placeholder="请输入手机号" />
+            </view>
+        </view>
+        <view class="weui-cell weui-cell_input weui-cell_vcode">
+            <view class="weui-cell__hd">
+                <view class="weui-label">验证码</view>
+            </view>
+            <view class="weui-cell__bd">
+                <input class="weui-input" @input="codeChange" placeholder="请输入验证码" />
+            </view>
+            <view class="weui-cell__ft">
+                <view class="weui-vcode-btn" @tap="getCode">获取验证码</view>
+            </view>
+        </view>
+    </view>
+    <button class="weui-btn" type="primary" @tap="bind" >绑定</button>
+
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import * as api from '../api/api.js'
+
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: '绑定手机号'
+    }
+    components = {
+
+    }
+
+
+    data = {
+      phoneNum:'',
+      code:'',
+      openid:''
+    }
+
+    computed = {
+      
+    }
+
+    methods = {
+      phoneNumChange (e) {
+          this.phoneNum = e.detail.value
+      },
+      codeChange (e) {
+          this.code = e.detail.value
+      },
+      bind () {
+        let user = wepy.getStorageSync('user')
+        wepy.request({
+          url: 'http://medlinkfamily.cn/sysex/index.php?m=wechat&c=interfaces&a=checkVerifyCode&p=json', 
+          data: {
+            phone: this.phoneNum,
+            password: this.code,
+            openid: user.openid
+          },
+          header: {
+            'content-type': 'application/json' // 默认值
+          },
+          success(res) {
+            wepy.redirectTo({
+              url: '/pages/music_list'
+            })  
+          }
+        })
+      },
+      getCode () {
+        wepy.request({
+          url: 'http://medlinkfamily.cn/sysex/index.php?m=wechat&c=interfaces&a=getVerCode&p=json', 
+          data: {
+            phone: this.phoneNum
+          },
+          header: {
+            'content-type': 'application/json' // 默认值
+          },
+          success(res) {
+            wepy.showToast({
+              title: res.data.message,
+            });
+          }
+        })
+      }
+    }
+
+    events = {
+      'index-emit': (...args) => {
+        let $event = args[args.length - 1]
+        console.log(`${this.$name} receive ${$event.name} from ${$event.source.$name}`)
+      }
+    }
+
+    onLoad() {
+      wepy.login({
+        success(res){
+          if (res.code) 
+          {
+            wepy.request({  
+                url: 'https://api.weixin.qq.com/sns/jscode2session?appid='+'wxb59da13859d938d4'+'&secret='+'b332504a57b56101a75f22779284ad6c'+'&js_code='+res.code+'&grant_type=authorization_code',  
+                data: {},  
+                method: 'GET', // OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT  
+                // header: {}, // 设置请求的 header  
+                success: function(res){ 
+                    var obj={};
+                    obj.openid=res.data.openid;  
+                    obj.expires_in=Date.now()+res.data.expires_in;  
+                    wepy.setStorageSync('user', obj);//存储openid  
+                }  
+            });
+          } 
+          else 
+          {
+            console.log('登录失败！' + res.errMsg)
+          }
+        }
+      })
+      
+    }
+  }
+</script>

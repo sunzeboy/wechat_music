@@ -1,0 +1,83 @@
+<style lang="less">
+    
+</style>
+
+<template>
+    <demo-block title="逛店铺">
+            <block wx:for-items="{{shop_list}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+                <van-cell title="{{index+1 + '.' + item.shopName}}" value="+店铺点歌" size="large" label="上次逛店时间：{{item.lastTime}}" @tap="jumpToWebView"/>
+                </van-cell>
+            </block>
+    </demo-block>
+    <demo-block title="逛店达人榜">
+            <block wx:for-items="{{talent_list}}" wx:for-index="index" wx:key="index"  wx:for-item="item">
+                <van-cell title="{{index+1 + '.' + item.nickName}}" value="逛店铺数:{{item.shopTime}}" />
+                </van-cell>
+            </block>
+    </demo-block>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import * as api from '../api/api.js'
+
+
+  export default class Music_shop extends wepy.page {
+    config = {
+      navigationBarTitleText: '店堂音乐',
+      usingComponents: {
+        'demo-block': '/styles/vant/demo-block/index',
+        'van-cell': '/styles/vant/cell/index'
+      }
+    }
+    components = {
+
+    }
+
+
+    data = {
+      shop_list:[
+          {
+        "shopName":"龙之梦中山公园店",
+        "lastTime":"2019-2-2"
+      },{
+        "shopName":"来福士人民广场店",
+        "lastTime":"2019-2-4"
+      },{
+        "shopName":"金桥国际广场",
+        "lastTime":"2019-4-2"
+      }],
+      talent_list:[
+          {
+        "nickName":"张三",
+        "shopTime":"22"
+      },{
+        "nickName":"李四",
+        "shopTime":"10"
+      },{
+        "nickName":"王五",
+        "shopTime":"8"
+      }]
+    }
+
+    computed = {
+      
+    }
+
+    methods = {
+      jumpToWebView () {
+        wepy.navigateTo({
+          url: '/pages/webview'
+        })
+      }
+    }
+
+    events = {
+      
+    }
+
+    onLoad() {
+      
+    }
+  }
+</script>

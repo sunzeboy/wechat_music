@@ -1,0 +1,343 @@
+<style lang="less">
+ .van-swipe-cell__left,
+.van-swipe-cell__right 
+{
+  display: inline-block;
+  width: 65px;
+  height: 44px;
+  font-size: 15px;
+  line-height: 44px;
+  color: #fff;
+  text-align: center;
+  background-color: #f44;
+}
+
+.weui-footer{
+    text-align: center;
+}
+.weui-footer_fixed-bottom{
+    bottom: 0%;
+}
+</style>
+
+<template>
+    <van-tabs >
+        <van-tab title="我的歌单">
+            <van-collapse value="{{ activeNames }}" bind:change="onChange" accordion>
+                <block wx:for-items="{{music_list}}" wx:for-index="index" wx:key="index" wx:for-item="section">
+                    <van-collapse-item name="{{index}}" value="{{section.list.length}}首" is-link clickable="true">
+                        <view slot="title">{{index+1 + '.' + section.section_name}}
+                            <van-icon size="20px" custom-style="padding:10px;" name="play-circle-o" @tap.stop="playAndAddToPlayList"/>
+                            <van-icon size="20px" name="edit" @tap.stop="edit"/>
+                            </view>
+                        <block wx:for-items="{{section.list}}" wx:for-index="i"  wx:key="i" wx:for-item="row">
+                            <van-cell title="{{row.name}}" value="歌手：{{row.author}}" size="large" label="歌手：{{row.author}}" />
+                        </block>
+                    </van-collapse-item>
+                </block>
+            </van-collapse>
+            <van-button size="large" @tap="add" >+添加新歌单</van-button>
+        </van-tab>
+        <van-tab title="我的收藏">
+            
+            <block wx:for-items="{{playlist}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+            
+            <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}" left-width="{{ 65 }}" async-close bind:close="onCellClose">
+                <view slot="left" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #fff;" >
+                    <van-checkbox
+                    style="display: inline-block;"
+                    value="{{ item.isSelected }}"
+                    checked-color="#13227a"
+                    @tap.stop="selectSingle({{index}})"
+                    >
+                    </van-checkbox>
+                </view>
+                <van-cell-group>
+                    <van-cell value="歌手：{{item.artist}}" size="large"  label="专辑：{{item.album}}" is-link>
+                    <view slot="title">
+                    <view class="van-cell-text">{{item.title}}</view>
+                    <van-tag wx:if="{{index == selectedIndex}}" type="danger">播放中...</van-tag>
+                    </view>
+                </van-cell>
+                </van-cell-group>
+                <view slot="right" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #f44;" >删除</view>
+            </van-swipe-cell>
+            </block>
+            <view class="weui-footer weui-footer_fixed-bottom">
+                <van-row>
+                    <van-col span="8">
+                        <van-checkbox
+                        style="display: inline-block;width: 33%;height: 100%;"
+                        value="{{ allSelect }}"
+                        checked-color="#13227a"
+                        @change="selectAll"
+                        >
+                        {{allSelect == true ? "反全选":"全选"}}
+                        </van-checkbox>
+                    </van-col>
+                    <van-col span="8">
+                        <view style="display: inline-block;height: 100%;line-height: 40px;width: 33%;color: #13227a;" @tap="addToMyMusicList">
+                            添加到歌单
+                        </view>
+                        <!-- <van-button plain type="primary">添加到歌单</van-button> -->
+                    </van-col>
+                    <van-col span="8">
+                        <view style="display: inline-block;height: 100%;line-height: 40px;width: 33%;color: #13227a;">
+                            移除收藏
+                        </view>
+                        <!-- <van-button plain type="primary">移除收藏</van-button> -->
+                    </van-col>
+                </van-row>
+            </view>
+        </van-tab>
+    </van-tabs>
+
+    <van-dialog
+    title="添加/编辑歌单"
+    use-slot
+    show="{{ isDialogShow }}"
+    show-cancel-button
+    bind:close="onDialogClose"
+    >
+    <image src="http://www.selwell.cn/sgmicro/images/歌单编辑/u132.png" />
+    <van-cell-group>
+    <van-field
+        value="{{ message }}"
+        label="歌单"
+        type="textarea"
+        placeholder="请输入留言"
+        autosize
+        border="{{ true }}"
+    />
+    <van-field
+        value="{{ message }}"
+        label="备注"
+        type="textarea"
+        placeholder="请输入留言"
+        autosize
+        border="{{ false }}"
+    />
+    </van-cell-group>
+    </van-dialog>
+
+    <van-dialog
+    title="添加到歌单"
+    use-slot
+    show="{{ is2DialogShow }}"
+    show-cancel-button
+    bind:close="onDialogClose"
+    >
+    <van-radio-group value="{{ result }}" bind:change="radioOnChange">
+    <van-cell-group >
+        <van-cell
+        wx:for="{{ music_list }}"
+        wx:key="index"
+        title="{{item.section_name}}（备注：XXX）{{index}}首"
+        clickable
+        data-name="{{index}}"
+        bind:click="toggle({{index}})"
+        >
+        <van-radio name="{{index}}" checked-color="#13227a"/>
+        </van-cell>
+    </van-cell-group>
+    </van-radio-group>
+    </van-dialog>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class MyMusic_list extends wepy.page {
+    config = {
+      navigationBarTitleText: '我的歌单',
+      component: true,
+      usingComponents: {
+        "van-tabs": "/styles/vant/tabs/index",
+        "van-tab": "/styles/vant/tab/index",
+        'van-collapse': '/styles/vant/collapse/index',
+        'van-collapse-item': '/styles/vant/collapse-item/index',
+        'van-cell': '/styles/vant/cell/index',
+        'van-cell-group': '/styles/vant/cell-group/index',
+        'van-button': '/styles/vant/button/index',
+        "van-icon": "/styles/vant/icon/index",
+        "van-dialog": "/styles/vant/dialog/index",
+        "van-field": "/styles/vant/field/index",
+        "van-swipe-cell": "/styles/vant/swipe-cell/index",
+        "van-checkbox": "/styles/vant/checkbox/index",
+        "van-radio": "/styles/vant/radio/index",
+        "van-radio-group": "/styles/vant/radio-group/index",
+      }
+    }
+    components = {
+
+    }
+
+
+    data = {
+      allSelect:false,
+      playlist:[],
+      activeNames: '1',
+      addNum:1,
+      isDialogShow:false,
+      is2DialogShow:false,
+      result:'',
+      music_list:[
+          {
+            "section_name":"办公场所歌单",
+            "list":[
+                {
+                    "name":"歌曲一",
+                    "url":"http://www.baidu.com",
+                    "author":"张三"
+                },
+                {
+                    "name":"歌曲二",
+                    "url":"http://www.baidu.com",
+                    "author":"李四"
+                },
+                {
+                    "name":"歌曲三",
+                    "url":"http://www.baidu.com",
+                    "author":"王五"
+                }
+            ]
+      },
+      {
+            "section_name":"家庭歌单",
+            "list":[
+                {
+                    "name":"歌曲一",
+                    "url":"http://www.baidu.com",
+                    "author":"张三"
+                },
+                {
+                    "name":"歌曲二",
+                    "url":"http://www.baidu.com",
+                    "author":"李四"
+                },
+                {
+                    "name":"歌曲三",
+                    "url":"http://www.baidu.com",
+                    "author":"王五"
+                },
+                {
+                    "name":"歌曲四",
+                    "url":"http://www.baidu.com",
+                    "author":"赵六"
+                },
+            ]
+      }]
+    }
+
+    computed = {
+      
+    }
+
+    methods = {
+      addToMyMusicList () {
+        this.is2DialogShow = true
+      },
+      radioOnChange(event) {
+        this.result = event.detail
+      },
+      toggle(index) {
+        this.result = index
+      },
+      onCellClose (event) {
+        let self = this
+        const { position, instance } = event.detail;
+        switch (position) {
+        case 'left':
+        case 'cell':
+            var swipeCell = self.$wxpage.selectAllComponents('#swipe-cell')
+            swipeCell.forEach(element => {
+                element.close()
+            });
+            self.allSelect = false
+            break;
+        case 'right':
+            // Dialog.confirm({
+            // message: '确定删除吗？'
+            // }).then(() => {
+            // instance.close();
+            // });
+            break;
+        }
+      },
+      selectSingle (index) {
+          var item = this.playlist[index]
+          item.isSelected = !item.isSelected
+          this.allSelect = this.custom_checkAllSelectedStatus()
+      },
+      selectAll () {
+          let self = this
+          var swipeCell = this.$wxpage.selectAllComponents('#swipe-cell')
+          swipeCell.forEach(element => {
+              element.open('left')
+          });
+          this.playlist.forEach(element => {
+              if (self.allSelect == true) //对所有item反全选操作
+              {
+                  element.isSelected = false
+              } 
+              else //对所有item全选操作
+              {
+                element.isSelected = true
+              }
+          })
+         this.allSelect = !this.allSelect
+      },
+      reverse_selectAll () {
+          this.allSelect = !this.allSelect
+          var swipeCell = this.$wxpage.selectAllComponents('#swipe-cell')
+          swipeCell.forEach(element => {
+              element.open('left')
+          });
+      },
+      onDialogClose () {
+          this.isDialogShow = false
+          this.is2DialogShow = false
+      },
+      edit () {
+          this.isDialogShow = true
+      },
+      playAndAddToPlayList () {
+
+      },
+      add () {
+          this.isDialogShow = true
+      }
+    }
+
+    custom_checkAllSelectedStatus () {
+        var flag = true
+        this.playlist.forEach(element => {
+            if (element.isSelected == false) 
+            {
+                flag = false
+            } 
+        });
+        return flag
+    }
+    events = {
+      
+    }
+    onChange (e) {
+        this.activeNames = e.detail
+    }
+    onLoad() {
+        let self = this
+        let sid = wepy.getStorageSync('sid') || 373
+        let url = 'http://47.96.191.22/client/index.php?m=bbc&c=index&a=s_playlist&p=json&sid=' + sid
+        wepy.request({  
+            url: url,  
+            data: {},  
+            method: 'GET',   
+            success: function(res){ 
+                self.playlist = res.data.items
+                self.$apply()
+            }  
+        });
+    }
+  }
+</script>

@@ -1,0 +1,55 @@
+<style lang="less">
+    
+</style>
+
+<template>
+    <van-card
+    price="剩余 2.00"
+    desc="账号：1388888888"
+    title="昵称：街头歌神"
+    thumb="/resource/head.jpg"
+    />
+    <van-cell title="个人信息" is-link />
+    <van-cell title="修改密码" is-link />
+    <van-cell title="个人画像" is-link />
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import * as api from '../api/api.js'
+
+
+  export default class Setting extends wepy.page {
+    config = {
+      navigationBarTitleText: '个人设置',
+      usingComponents: {
+        'van-card': '/styles/vant/card/index',
+        'van-cell': '/styles/vant/cell/index',
+      }
+    }
+    components = {
+
+    }
+
+
+    data = {
+      
+    }
+
+    computed = {
+      
+    }
+
+    methods = {
+      
+    }
+
+    events = {
+      
+    }
+
+    onLoad() {
+      
+    }
+  }
+</script>

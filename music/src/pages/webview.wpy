@@ -1,0 +1,56 @@
+<style lang="less">
+    
+</style>
+
+<template>
+    <web-view src="http://www.apple.com/cn/">
+        
+    </web-view>
+
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import * as api from '../api/api.js'
+
+
+  export default class WebView extends wepy.page {
+    config = {
+      navigationBarTitleText: '浏览器'
+    }
+    components = {
+
+    }
+
+
+    data = {
+      phoneNum:'',
+      code:'',
+      openid:''
+    }
+
+    computed = {
+      
+    }
+
+    methods = {
+      phoneNumChange (e) {
+          this.phoneNum = e.detail.value
+      },
+      codeChange (e) {
+          this.code = e.detail.value
+      }
+    }
+
+    events = {
+      'index-emit': (...args) => {
+        let $event = args[args.length - 1]
+        console.log(`${this.$name} receive ${$event.name} from ${$event.source.$name}`)
+      }
+    }
+
+    onLoad() {
+      
+    }
+  }
+</script>
