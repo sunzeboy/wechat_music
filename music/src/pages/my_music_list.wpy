@@ -17,85 +17,77 @@
 .weui-footer_fixed-bottom {
   bottom: 0%;
 }
-.van-tabs__line {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  z-index: 1;
-  height: 3px;
-  background-color: #13227a;
-  border-radius: 3px;
-}
 </style>
 
 <template>
-    <van-tabs color="#13227a">
+    <van-tabs color="#13227a" swipeable=true>
         <van-tab title="我的歌单">
-            <van-collapse value="{{ activeNames }}" bind:change="onChange" accordion>
-                <block wx:for-items="{{music_list}}" wx:for-index="index" wx:key="index" wx:for-item="section">
-                    <van-collapse-item name="{{index}}" value="{{section.list.length}}首" is-link clickable="true">
-                        <view slot="title">{{index+1 + '.' + section.section_name}}
-                            <van-icon size="20px" custom-style="padding:10px;" name="play-circle-o" @tap.stop="playAndAddToPlayList"/>
-                            <van-icon size="20px" name="edit" @tap.stop="edit"/>
-                            </view>
-                        <block wx:for-items="{{section.list}}" wx:for-index="i"  wx:key="i" wx:for-item="row">
-                            <van-cell title="{{row.name}}" value="歌手：{{row.author}}" size="large" label="歌手：{{row.author}}" />
-                        </block>
-                    </van-collapse-item>
-                </block>
-            </van-collapse>
-            <van-button size="large" @tap="add" >+添加新歌单</van-button>
+            <view style="width: 100%;height: {{screenHeight}}rpx;background-color: #fff;">
+                <van-collapse value="{{ activeNames }}" bind:change="onChange" accordion>
+                    <block wx:for-items="{{music_list}}" wx:for-index="index" wx:key="index" wx:for-item="section">
+                        <van-collapse-item name="{{index}}" value="{{section.list.length}}首" is-link clickable="true">
+                            <view slot="title">{{index+1 + '.' + section.section_name}}
+                                <van-icon size="20px" custom-style="padding:10px;" name="play-circle-o" @tap.stop="playAndAddToPlayList"/>
+                                <van-icon size="20px" name="edit" @tap.stop="edit"/>
+                                </view>
+                            <block wx:for-items="{{section.list}}" wx:for-index="i"  wx:key="i" wx:for-item="row">
+                                <van-cell title="{{row.name}}" value="歌手：{{row.author}}" size="large" label="歌手：{{row.author}}" />
+                            </block>
+                        </van-collapse-item>
+                    </block>
+                </van-collapse>
+                <van-button size="large" @tap="add" >+添加新歌单</van-button>
+            </view>
         </van-tab>
         <van-tab title="我的收藏">
-            
-            <block wx:for-items="{{playlist}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-            
-            <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}" left-width="{{ 65 }}" async-close bind:close="onCellClose">
-                <view slot="left" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #fff;" >
-                    <van-checkbox
-                    style="display: inline-block;"
-                    value="{{ item.isSelected }}"
-                    checked-color="#13227a"
-                    @tap.stop="selectSingle({{index}})"
-                    >
-                    </van-checkbox>
+            <view style="width: 100%;height: {{screenHeight}}rpx;background-color: #fff;">
+                <block wx:for-items="{{playlist}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+                
+                    <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}" left-width="{{ 65 }}" async-close bind:close="onCellClose">
+                        <view slot="left" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #fff;" >
+                            <van-checkbox
+                            style="display: inline-block;"
+                            value="{{ item.isSelected }}"
+                            checked-color="#13227a"
+                            @tap.stop="selectSingle({{index}})"
+                            >
+                            </van-checkbox>
+                        </view>
+                        <van-cell-group>
+                            <van-cell value="歌手：{{item.artist}}" size="large"  label="专辑：{{item.album}}" is-link>
+                            <view slot="title">
+                            <view class="van-cell-text">{{item.title}}</view>
+                            <van-tag wx:if="{{index == selectedIndex}}" type="danger">播放中...</van-tag>
+                            </view>
+                        </van-cell>
+                        </van-cell-group>
+                        <view slot="right" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #f44;" >删除</view>
+                    </van-swipe-cell>
+                </block>
+                <view class="weui-footer weui-footer_fixed-bottom">
+                    <van-row>
+                        <van-col span="8">
+                            <van-checkbox
+                            style="display: inline-block;width: 33%;height: 100%;"
+                            value="{{ allSelect }}"
+                            checked-color="#13227a"
+                            @change="selectAll"
+                            >
+                            {{allSelect == true ? "反全选":"全选"}}
+                            </van-checkbox>
+                        </van-col>
+                        <van-col span="8">
+                            <view style="display: inline-block;height: 100%;line-height: 40px;width: 33%;color: #13227a;" @tap="addToMyMusicList">
+                                添加到歌单
+                            </view>
+                        </van-col>
+                        <van-col span="8">
+                            <view style="display: inline-block;height: 100%;line-height: 40px;width: 33%;color: #13227a;">
+                                移除收藏
+                            </view>
+                        </van-col>
+                    </van-row>
                 </view>
-                <van-cell-group>
-                    <van-cell value="歌手：{{item.artist}}" size="large"  label="专辑：{{item.album}}" is-link>
-                    <view slot="title">
-                    <view class="van-cell-text">{{item.title}}</view>
-                    <van-tag wx:if="{{index == selectedIndex}}" type="danger">播放中...</van-tag>
-                    </view>
-                </van-cell>
-                </van-cell-group>
-                <view slot="right" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #f44;" >删除</view>
-            </van-swipe-cell>
-            </block>
-            <view class="weui-footer weui-footer_fixed-bottom">
-                <van-row>
-                    <van-col span="8">
-                        <van-checkbox
-                        style="display: inline-block;width: 33%;height: 100%;"
-                        value="{{ allSelect }}"
-                        checked-color="#13227a"
-                        @change="selectAll"
-                        >
-                        {{allSelect == true ? "反全选":"全选"}}
-                        </van-checkbox>
-                    </van-col>
-                    <van-col span="8">
-                        <view style="display: inline-block;height: 100%;line-height: 40px;width: 33%;color: #13227a;" @tap="addToMyMusicList">
-                            添加到歌单
-                        </view>
-                        <!-- <van-button plain type="primary">添加到歌单</van-button> -->
-                    </van-col>
-                    <van-col span="8">
-                        <view style="display: inline-block;height: 100%;line-height: 40px;width: 33%;color: #13227a;">
-                            移除收藏
-                        </view>
-                        <!-- <van-button plain type="primary">移除收藏</van-button> -->
-                    </van-col>
-                </van-row>
             </view>
         </van-tab>
     </van-tabs>
@@ -179,6 +171,7 @@ export default class MyMusic_list extends wepy.page {
   components = {};
 
   data = {
+    screenHeight:800,
     allSelect: false,
     playlist: [],
     activeNames: '1',
@@ -325,6 +318,12 @@ export default class MyMusic_list extends wepy.page {
   }
   onLoad() {
     let self = this;
+    wepy.getSystemInfo({
+        success(res){
+            self.screenHeight = (res.windowHeight-44)/(res.windowWidth/750)
+            self.$apply()
+        }
+    })
     let sid = wepy.getStorageSync('sid') || 373;
     let url =
       'http://47.96.191.22/client/index.php?m=bbc&c=index&a=s_playlist&p=json&sid=' +

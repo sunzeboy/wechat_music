@@ -1,5 +1,5 @@
 <style lang="less">
-    .section,.van-cell__title{
+    .section{
         text-align: center;
     }
     
@@ -9,7 +9,7 @@
     <image style="width: 100%; height: 200px; background-color: #eeeeee;" src="http://www.selwell.cn/sgmicro/images/歌单编辑/u132.png"></image>
     <van-cell title="当前播放列表" class="section">
         <van-icon slot="right-icon" name="todo-list-o" class="custom-icon" color="#13227a" size="20px" @tap="dianMusic"/>
-        <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#13227a" size="20px" style="margin-left:15px;" @tap="playSong"/>
+        <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#13227a" size="20px" style="margin-left:15px;" @tap="playMusic"/>
     </van-cell>
     <block wx:for-items="{{playlist}}" wx:for-index="index" wx:key="index" wx:for-item="item">
         <van-cell title="{{item.title}}" size="large" value="歌手：{{item.artist}}" label="专辑：{{item.album}}" >
@@ -46,7 +46,16 @@
     }
 
     methods = {
-      
+      dianMusic () {
+        wepy.navigateTo({
+          url: '/pages/webview?thirdUrl='+'http://www.baidu.com'
+        })
+      },
+      playMusic () {
+        wepy.navigateTo({
+          url: '/pages/webview?thirdUrl='+'http://www.apple.com/cn'
+        })
+      },
     }
 
     events = {

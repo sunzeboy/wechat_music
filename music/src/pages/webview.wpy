@@ -16,7 +16,7 @@
 
   export default class WebView extends wepy.page {
     config = {
-      navigationBarTitleText: '浏览器'
+      navigationBarTitleText: '加载中...'
     }
     components = {
 
@@ -49,7 +49,7 @@
       }
     }
 
-    onLoad() {
+    onLoad(options) {
       
     }
   }
