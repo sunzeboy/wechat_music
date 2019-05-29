@@ -67,7 +67,7 @@
     methods = {
       jumpToWebView () {
         wepy.navigateTo({
-          url: '/pages/webview'
+          url: '/pages/shop_home'
         })
       }
     }

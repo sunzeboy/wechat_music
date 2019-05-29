@@ -28,7 +28,7 @@ export default class extends wepy.app {
       'pages/my_music_list',
       'pages/setting',
       'pages/webview',
-      // 'pages/webview_base',
+      'pages/shop_home',
       'pages/music_shop'
     ],
     window: {

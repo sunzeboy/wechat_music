@@ -1,7 +1,6 @@
 <style lang="less">
- .van-swipe-cell__left,
-.van-swipe-cell__right 
-{
+.van-swipe-cell__left,
+.van-swipe-cell__right {
   display: inline-block;
   width: 65px;
   height: 44px;
@@ -12,16 +11,25 @@
   background-color: #f44;
 }
 
-.weui-footer{
-    text-align: center;
+.weui-footer {
+  text-align: center;
 }
-.weui-footer_fixed-bottom{
-    bottom: 0%;
+.weui-footer_fixed-bottom {
+  bottom: 0%;
+}
+.van-tabs__line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  height: 3px;
+  background-color: #13227a;
+  border-radius: 3px;
 }
 </style>
 
 <template>
-    <van-tabs >
+    <van-tabs color="#13227a">
         <van-tab title="我的歌单">
             <van-collapse value="{{ activeNames }}" bind:change="onChange" accordion>
                 <block wx:for-items="{{music_list}}" wx:for-index="index" wx:key="index" wx:for-item="section">
@@ -145,199 +153,191 @@
 </template>
 
 <script>
-  import wepy from 'wepy'
+import wepy from 'wepy';
 
-  export default class MyMusic_list extends wepy.page {
-    config = {
-      navigationBarTitleText: '我的歌单',
-      component: true,
-      usingComponents: {
-        "van-tabs": "/styles/vant/tabs/index",
-        "van-tab": "/styles/vant/tab/index",
-        'van-collapse': '/styles/vant/collapse/index',
-        'van-collapse-item': '/styles/vant/collapse-item/index',
-        'van-cell': '/styles/vant/cell/index',
-        'van-cell-group': '/styles/vant/cell-group/index',
-        'van-button': '/styles/vant/button/index',
-        "van-icon": "/styles/vant/icon/index",
-        "van-dialog": "/styles/vant/dialog/index",
-        "van-field": "/styles/vant/field/index",
-        "van-swipe-cell": "/styles/vant/swipe-cell/index",
-        "van-checkbox": "/styles/vant/checkbox/index",
-        "van-radio": "/styles/vant/radio/index",
-        "van-radio-group": "/styles/vant/radio-group/index",
-      }
+export default class MyMusic_list extends wepy.page {
+  config = {
+    navigationBarTitleText: '我的歌单',
+    component: true,
+    usingComponents: {
+      'van-tabs': '/styles/vant/tabs/index',
+      'van-tab': '/styles/vant/tab/index',
+      'van-collapse': '/styles/vant/collapse/index',
+      'van-collapse-item': '/styles/vant/collapse-item/index',
+      'van-cell': '/styles/vant/cell/index',
+      'van-cell-group': '/styles/vant/cell-group/index',
+      'van-button': '/styles/vant/button/index',
+      'van-icon': '/styles/vant/icon/index',
+      'van-dialog': '/styles/vant/dialog/index',
+      'van-field': '/styles/vant/field/index',
+      'van-swipe-cell': '/styles/vant/swipe-cell/index',
+      'van-checkbox': '/styles/vant/checkbox/index',
+      'van-radio': '/styles/vant/radio/index',
+      'van-radio-group': '/styles/vant/radio-group/index'
     }
-    components = {
+  };
+  components = {};
 
-    }
-
-
-    data = {
-      allSelect:false,
-      playlist:[],
-      activeNames: '1',
-      addNum:1,
-      isDialogShow:false,
-      is2DialogShow:false,
-      result:'',
-      music_list:[
+  data = {
+    allSelect: false,
+    playlist: [],
+    activeNames: '1',
+    addNum: 1,
+    isDialogShow: false,
+    is2DialogShow: false,
+    result: '',
+    music_list: [
+      {
+        section_name: '办公场所歌单',
+        list: [
           {
-            "section_name":"办公场所歌单",
-            "list":[
-                {
-                    "name":"歌曲一",
-                    "url":"http://www.baidu.com",
-                    "author":"张三"
-                },
-                {
-                    "name":"歌曲二",
-                    "url":"http://www.baidu.com",
-                    "author":"李四"
-                },
-                {
-                    "name":"歌曲三",
-                    "url":"http://www.baidu.com",
-                    "author":"王五"
-                }
-            ]
+            name: '歌曲一',
+            url: 'http://www.baidu.com',
+            author: '张三'
+          },
+          {
+            name: '歌曲二',
+            url: 'http://www.baidu.com',
+            author: '李四'
+          },
+          {
+            name: '歌曲三',
+            url: 'http://www.baidu.com',
+            author: '王五'
+          }
+        ]
       },
       {
-            "section_name":"家庭歌单",
-            "list":[
-                {
-                    "name":"歌曲一",
-                    "url":"http://www.baidu.com",
-                    "author":"张三"
-                },
-                {
-                    "name":"歌曲二",
-                    "url":"http://www.baidu.com",
-                    "author":"李四"
-                },
-                {
-                    "name":"歌曲三",
-                    "url":"http://www.baidu.com",
-                    "author":"王五"
-                },
-                {
-                    "name":"歌曲四",
-                    "url":"http://www.baidu.com",
-                    "author":"赵六"
-                },
-            ]
-      }]
-    }
+        section_name: '家庭歌单',
+        list: [
+          {
+            name: '歌曲一',
+            url: 'http://www.baidu.com',
+            author: '张三'
+          },
+          {
+            name: '歌曲二',
+            url: 'http://www.baidu.com',
+            author: '李四'
+          },
+          {
+            name: '歌曲三',
+            url: 'http://www.baidu.com',
+            author: '王五'
+          },
+          {
+            name: '歌曲四',
+            url: 'http://www.baidu.com',
+            author: '赵六'
+          }
+        ]
+      }
+    ]
+  };
 
-    computed = {
-      
-    }
+  computed = {};
 
-    methods = {
-      addToMyMusicList () {
-        this.is2DialogShow = true
-      },
-      radioOnChange(event) {
-        this.result = event.detail
-      },
-      toggle(index) {
-        this.result = index
-      },
-      onCellClose (event) {
-        let self = this
-        const { position, instance } = event.detail;
-        switch (position) {
+  methods = {
+    addToMyMusicList() {
+      this.is2DialogShow = true;
+    },
+    radioOnChange(event) {
+      this.result = event.detail;
+    },
+    toggle(index) {
+      this.result = index;
+    },
+    onCellClose(event) {
+      let self = this;
+      const { position, instance } = event.detail;
+      switch (position) {
         case 'left':
         case 'cell':
-            var swipeCell = self.$wxpage.selectAllComponents('#swipe-cell')
-            swipeCell.forEach(element => {
-                element.close()
-            });
-            self.allSelect = false
-            break;
+          var swipeCell = self.$wxpage.selectAllComponents('#swipe-cell');
+          swipeCell.forEach(element => {
+            element.close();
+          });
+          self.allSelect = false;
+          break;
         case 'right':
-            // Dialog.confirm({
-            // message: '确定删除吗？'
-            // }).then(() => {
-            // instance.close();
-            // });
-            break;
-        }
-      },
-      selectSingle (index) {
-          var item = this.playlist[index]
-          item.isSelected = !item.isSelected
-          this.allSelect = this.custom_checkAllSelectedStatus()
-      },
-      selectAll () {
-          let self = this
-          var swipeCell = this.$wxpage.selectAllComponents('#swipe-cell')
-          swipeCell.forEach(element => {
-              element.open('left')
-          });
-          this.playlist.forEach(element => {
-              if (self.allSelect == true) //对所有item反全选操作
-              {
-                  element.isSelected = false
-              } 
-              else //对所有item全选操作
-              {
-                element.isSelected = true
-              }
-          })
-         this.allSelect = !this.allSelect
-      },
-      reverse_selectAll () {
-          this.allSelect = !this.allSelect
-          var swipeCell = this.$wxpage.selectAllComponents('#swipe-cell')
-          swipeCell.forEach(element => {
-              element.open('left')
-          });
-      },
-      onDialogClose () {
-          this.isDialogShow = false
-          this.is2DialogShow = false
-      },
-      edit () {
-          this.isDialogShow = true
-      },
-      playAndAddToPlayList () {
-
-      },
-      add () {
-          this.isDialogShow = true
+          // Dialog.confirm({
+          // message: '确定删除吗？'
+          // }).then(() => {
+          // instance.close();
+          // });
+          break;
       }
+    },
+    selectSingle(index) {
+      var item = this.playlist[index];
+      item.isSelected = !item.isSelected;
+      this.allSelect = this.custom_checkAllSelectedStatus();
+    },
+    selectAll() {
+      let self = this;
+      var swipeCell = this.$wxpage.selectAllComponents('#swipe-cell');
+      swipeCell.forEach(element => {
+        element.open('left');
+      });
+      this.playlist.forEach(element => {
+        if (self.allSelect == true) {
+          //对所有item反全选操作
+          element.isSelected = false;
+        } //对所有item全选操作
+        else {
+          element.isSelected = true;
+        }
+      });
+      this.allSelect = !this.allSelect;
+    },
+    reverse_selectAll() {
+      this.allSelect = !this.allSelect;
+      var swipeCell = this.$wxpage.selectAllComponents('#swipe-cell');
+      swipeCell.forEach(element => {
+        element.open('left');
+      });
+    },
+    onDialogClose() {
+      this.isDialogShow = false;
+      this.is2DialogShow = false;
+    },
+    edit() {
+      this.isDialogShow = true;
+    },
+    playAndAddToPlayList() {},
+    add() {
+      this.isDialogShow = true;
     }
+  };
 
-    custom_checkAllSelectedStatus () {
-        var flag = true
-        this.playlist.forEach(element => {
-            if (element.isSelected == false) 
-            {
-                flag = false
-            } 
-        });
-        return flag
-    }
-    events = {
-      
-    }
-    onChange (e) {
-        this.activeNames = e.detail
-    }
-    onLoad() {
-        let self = this
-        let sid = wepy.getStorageSync('sid') || 373
-        let url = 'http://47.96.191.22/client/index.php?m=bbc&c=index&a=s_playlist&p=json&sid=' + sid
-        wepy.request({  
-            url: url,  
-            data: {},  
-            method: 'GET',   
-            success: function(res){ 
-                self.playlist = res.data.items
-                self.$apply()
-            }  
-        });
-    }
+  custom_checkAllSelectedStatus() {
+    var flag = true;
+    this.playlist.forEach(element => {
+      if (element.isSelected == false) {
+        flag = false;
+      }
+    });
+    return flag;
   }
+  events = {};
+  onChange(e) {
+    this.activeNames = e.detail;
+  }
+  onLoad() {
+    let self = this;
+    let sid = wepy.getStorageSync('sid') || 373;
+    let url =
+      'http://47.96.191.22/client/index.php?m=bbc&c=index&a=s_playlist&p=json&sid=' +
+      sid;
+    wepy.request({
+      url: url,
+      data: {},
+      method: 'GET',
+      success: function(res) {
+        self.playlist = res.data.items;
+        self.$apply();
+      }
+    });
+  }
+}
 </script>

@@ -1,0 +1,71 @@
+<style lang="less">
+    .section,.van-cell__title{
+        text-align: center;
+    }
+    
+</style>
+
+<template>
+    <image style="width: 100%; height: 200px; background-color: #eeeeee;" src="http://www.selwell.cn/sgmicro/images/歌单编辑/u132.png"></image>
+    <van-cell title="当前播放列表" class="section">
+        <van-icon slot="right-icon" name="todo-list-o" class="custom-icon" color="#13227a" size="20px" @tap="dianMusic"/>
+        <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#13227a" size="20px" style="margin-left:15px;" @tap="playSong"/>
+    </van-cell>
+    <block wx:for-items="{{playlist}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+        <van-cell title="{{item.title}}" size="large" value="歌手：{{item.artist}}" label="专辑：{{item.album}}" >
+            <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" class="custom-icon" color="#13227a" size="20px" @tap="like({{index}})"/>
+        </van-cell>
+    </block>
+    
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import * as api from '../api/api.js'
+
+
+  export default class ShopHome extends wepy.page {
+    config = {
+      navigationBarTitleText: '店铺首页',
+      usingComponents: {
+        'van-cell': '/styles/vant/cell/index',
+        "van-icon": "/styles/vant/icon/index",
+      }
+    }
+    components = {
+
+    }
+
+
+    data = {
+        playlist:[],
+    }
+
+    computed = {
+    
+    }
+
+    methods = {
+      
+    }
+
+    events = {
+      
+    }
+
+    onLoad() {
+      let self = this
+      let sid = wepy.getStorageSync('sid') || 373
+      let url = 'http://47.96.191.22/client/index.php?m=bbc&c=index&a=s_playlist&p=json&sid=' + sid
+      wepy.request({  
+        url: url,  
+        data: {},  
+        method: 'GET',   
+        success: function(res){ 
+            self.playlist = res.data.items
+            self.$apply()
+        }  
+      });
+    }
+  }
+</script>
