@@ -6,7 +6,7 @@
     <van-card
     price="剩余 2.00"
     desc="账号：1388888888"
-    title="昵称：街头歌神"
+    title="昵称：{{nickname}}"
     thumb="/resource/head.jpg"
     />
     <van-cell title="个人信息" is-link />
@@ -37,7 +37,9 @@
     }
 
     computed = {
-      
+      nickname(){
+        return this.$parent.globalData.businessData.userInfo.nickname
+      }
     }
 
     methods = {

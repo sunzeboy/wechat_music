@@ -19,6 +19,15 @@ function getCurrentTime() {
 }
 
 /**
+ * 时间戳转换为字符串//https://segmentfault.com/a/1190000015992232
+ * @param {*} time 
+ */
+function timeDesc(time = +new Date()) {
+  var date = new Date(time + 8 * 3600 * 1000);
+  return date.toJSON().substr(0, 19).replace('T', ' ');
+}
+
+/**
  * 获取当年时间戳
  * @returns {number}
  */
@@ -243,5 +252,6 @@ module.exports = {
   mul: mul,
   accAdd: accAdd,
   getTimeStamp: getTimeStamp,
-  checkAuth
+  checkAuth,
+  timeDesc
 }

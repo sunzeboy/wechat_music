@@ -4,8 +4,8 @@
 
 <template>
     <demo-block title="逛店铺">
-            <block wx:for-items="{{shop_list}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-                <van-cell title="{{index+1 + '.' + item.shopName}}" value="+店铺点歌" size="large" label="上次逛店时间：{{item.lastTime}}" @tap="jumpToWebView"/>
+            <block wx:for-items="{{shops}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+                <van-cell title="{{index+1 + '.' + item.name}}" value="+店铺点歌" size="large" label="上次逛店时间:{{item.timeDesc}}" @tap="jumpToWebView({{item}})"/>
                 </van-cell>
             </block>
     </demo-block>
@@ -19,7 +19,7 @@
 
 <script>
   import wepy from 'wepy'
-  import * as api from '../api/api.js'
+  import * as utils from '../utils/utils.js'
 
 
   export default class Music_shop extends wepy.page {
@@ -61,17 +61,30 @@
     }
 
     computed = {
+      shops(){
+        var array = this.$parent.globalData.businessData.shops
+        array.forEach(element => {
+          // element.timeDesc = utils.timeDesc(element.lasthit)
+          element.timeDesc = utils.timeDesc()
+        });
+        console.log(array);
+        return array
+      },
       
     }
 
     methods = {
-      jumpToWebView () {
+      jumpToWebView (item) {
         wepy.navigateTo({
-          url: '/pages/shop_home'
+          url: '/pages/shop_home?shopsid='+item.sid
         })
       }
     }
-
+    custom_lastTime(index){
+      console.log(index);
+      console.log(this.$parent.globalData.businessData.shops)
+      return '上次逛店时间：'+ utils.timeDesc(this.$parent.globalData.businessData.shops[index].lasthit)
+    }
     events = {
       
     }

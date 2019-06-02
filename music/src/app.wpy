@@ -67,6 +67,10 @@ export default class extends wepy.app {
   }
 
   globalData = {
+    cur_plist_list_sid:0,
+    screenHeight:0,
+    screenWidth:0,
+    businessData:{},
     userInfo: null
   }
 
@@ -78,6 +82,58 @@ export default class extends wepy.app {
   onLaunch(options) {
     // this.testAsync()
     wepy.setStorageSync('sid', options.query.sid);//存储openid  
+    // this.getUserInfo()
+    this.login()
+    let self = this
+    wepy.getSystemInfo({
+        success(res){
+            self.globalData.screenHeight = res.windowHeight
+            self.globalData.screenWidth = res.windowWidth
+        }
+    })
+  }
+
+  login() {
+    let self = this
+    wepy.login({
+      success (res) {
+        if (res.code) 
+        {
+          //发起网络请求
+          wx.request({
+            url: 'https://api.weixin.qq.com/sns/jscode2session?appid=wxb59da13859d938d4&secret=633a602a78cd9ec0ffa3cddd3de08450&js_code='+ res.code +'&grant_type=authorization_code',
+            data: {},
+            header: {
+                'content-type': 'application/json'
+            },
+            success: function(res) {
+              console.log(res);
+              // openid = res.data.openid //返回openid
+              var op = {}
+              op.openid = res.data.openid
+              self.fetchData(op)
+            }
+          })
+        } else {
+          console.log('登录失败！' + res.errMsg)
+        }
+      }
+    })
+  }
+
+  fetchData(options) {
+    let self = this
+    let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=index&unionid=aaaaaa&openid=bbbbbb'
+    // let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=index&unionid=aaaaaa&openid=bbbbbb'+options.openid
+    wepy.request({  
+        url: url,  
+        data: {},  
+        method: 'GET',   
+        success: function(res){ 
+          console.log(res);
+          self.globalData.businessData = res.data
+        }  
+    });
   }
 
   sleep (s) {

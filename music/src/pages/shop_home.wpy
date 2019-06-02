@@ -11,18 +11,23 @@
         <van-icon slot="right-icon" name="todo-list-o" class="custom-icon" color="#13227a" size="20px" @tap="dianMusic"/>
         <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#13227a" size="20px" style="margin-left:15px;" @tap="playMusic"/>
     </van-cell>
-    <block wx:for-items="{{playlist}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-        <van-cell title="{{item.title}}" size="large" value="歌手：{{item.artist}}" label="专辑：{{item.album}}" >
-            <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" class="custom-icon" color="#13227a" size="20px" @tap="like({{index}})"/>
+    <block wx:for-items="{{playlist.sections}}" wx:for-index="index" wx:key="index" wx:for-item="section">
+      <van-cell title="{{section.title}}" class="section">
+      </van-cell>
+      <block wx:for-items="{{section.items}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+          <van-cell title="{{item.title}}" size="large" value="歌手：{{item.artist}}" label="专辑：{{item.album}}" >
+            <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" class="custom-icon" color="#13227a" size="20px" @tap="like({{item}})"/>
         </van-cell>
+      </block>
     </block>
+    <van-toast id="van-toast" />
     
 </template>
 
 <script>
   import wepy from 'wepy'
   import * as api from '../api/api.js'
-
+  import Toast from '../styles/vant/toast/toast';
 
   export default class ShopHome extends wepy.page {
     config = {
@@ -30,6 +35,7 @@
       usingComponents: {
         'van-cell': '/styles/vant/cell/index',
         "van-icon": "/styles/vant/icon/index",
+        "van-toast": "/styles/vant/toast/index"
       }
     }
     components = {
@@ -42,7 +48,9 @@
     }
 
     computed = {
-    
+      isFavorite(){
+
+      }
     }
 
     methods = {
@@ -52,27 +60,67 @@
         })
       },
       playMusic () {
-        wepy.navigateTo({
-          url: '/pages/webview?thirdUrl='+'http://www.apple.com/cn'
-        })
+        this.$parent.globalData.cur_plist_list_sid = -1
+        this.$parent.globalData.cur_playlist = this.playlist
+        console.log(this.$parent.globalData.cur_playlist);
+        this.$parent.globalData.playlist_needRefresh = true
+        setTimeout(() => {
+          wepy.switchTab({
+            url: '/pages/music_list'
+          })
+        }, 0);
+        
       },
+      like(item){
+        let self = this
+        Toast.loading({
+          mask: true,
+          message: '加载中...'
+        });
+        let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_fav&p=json'
+        wepy.request({  
+          url: url,  
+          data: {
+            "usersid":this.$parent.globalData.businessData.userInfo.sid,
+            "type":1,
+            "filesid":item.filesid
+          },  
+          method: 'POST',   
+          success: function(res){ 
+            console.log(res);
+            self.playlist = res.data.playlist
+            self.$apply()
+            Toast.clear()
+          }  
+        });
+      }
     }
 
     events = {
       
     }
 
-    onLoad() {
+    onLoad(options) {
       let self = this
-      let sid = wepy.getStorageSync('sid') || 373
-      let url = 'http://47.96.191.22/client/index.php?m=bbc&c=index&a=s_playlist&p=json&sid=' + sid
+      Toast.loading({
+        mask: true,
+        message: '加载中...'
+      });
+      let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_playlist&p=json'
       wepy.request({  
         url: url,  
-        data: {},  
+        data: {
+          "shopsid":options.shopsid
+        },  
         method: 'GET',   
         success: function(res){ 
-            self.playlist = res.data.items
-            self.$apply()
+          console.log(res);
+          var p = res.data.playlist
+          res.data.playlist.sections = res.data.playlist.sections.concat(res.data.addlist.sections)
+          self.playlist = res.data.playlist
+          console.log(self.playlist);
+          self.$apply()
+          Toast.clear()
         }  
       });
     }

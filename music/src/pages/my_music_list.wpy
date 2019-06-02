@@ -23,7 +23,7 @@
     <van-tabs color="#13227a" swipeable=true>
         <van-tab title="我的歌单">
             <view style="width: 100%;height: {{screenHeight}}rpx;background-color: #fff;">
-                <van-collapse value="{{ activeNames }}" bind:change="onChange" accordion>
+                <!-- <van-collapse value="{{ activeNames }}" bind:change="onChange" accordion>
                     <block wx:for-items="{{music_list}}" wx:for-index="index" wx:key="index" wx:for-item="section">
                         <van-collapse-item name="{{index}}" value="{{section.list.length}}首" is-link clickable="true">
                             <view slot="title">{{index+1 + '.' + section.section_name}}
@@ -35,15 +35,25 @@
                             </block>
                         </van-collapse-item>
                     </block>
-                </van-collapse>
+                </van-collapse> -->
+                <block wx:for-items="{{playlists}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+                    <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}" async-close bind:close="onCellClose({{item}})">
+                        <van-cell title="{{/*index+1 + '.' +*/ item.title}}" icon="http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_img&sid={{item.sid}}" label="备注：{{item.comment}}" class="section">
+                            <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#13227a" size="20px" @tap="playAndAddToPlayList({{item.sid}})"/>
+                            <van-icon slot="right-icon" name="edit" class="custom-icon" color="#13227a" size="20px" style="margin-left:15px;" @tap="edit({{item}})"/>
+                        </van-cell>
+                        <view slot="right" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #f44;" >删除</view>
+                    </van-swipe-cell>
+                </block>
+                
                 <van-button size="large" @tap="add" >+添加新歌单</van-button>
             </view>
         </van-tab>
         <van-tab title="我的收藏">
             <view style="width: 100%;height: {{screenHeight}}rpx;background-color: #fff;">
-                <block wx:for-items="{{playlist}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+                <block wx:for-items="{{favorites}}" wx:for-index="index" wx:key="index" wx:for-item="item">
                 
-                    <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}" left-width="{{ 65 }}" async-close bind:close="onCellClose">
+                    <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}" left-width="{{ 65 }}" async-close bind:close="onCellClose({{item}})">
                         <view slot="left" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #fff;" >
                             <van-checkbox
                             style="display: inline-block;"
@@ -98,24 +108,28 @@
     show="{{ isDialogShow }}"
     show-cancel-button
     bind:close="onDialogClose"
+    bind:confirm="addPlayList"
+    async-close=true
     >
-    <image src="http://www.selwell.cn/sgmicro/images/歌单编辑/u132.png" />
+    <image src="{{img_url}}" mode="aspectFit" @tap="chooseImg"/>
     <van-cell-group>
     <van-field
-        value="{{ message }}"
+        value="{{ music_list_name }}"
         label="歌单"
         type="textarea"
-        placeholder="请输入留言"
+        placeholder="请输入歌单名"
         autosize
         border="{{ true }}"
+        bind:change="change(1)"
     />
     <van-field
-        value="{{ message }}"
+        value="{{ comment_name }}"
         label="备注"
         type="textarea"
-        placeholder="请输入留言"
+        placeholder="请输入备注名称"
         autosize
         border="{{ false }}"
+        bind:change="change(2)"
     />
     </van-cell-group>
     </van-dialog>
@@ -126,26 +140,31 @@
     show="{{ is2DialogShow }}"
     show-cancel-button
     bind:close="onDialogClose"
+    bind:confirm="addToPlayList"
     >
     <van-radio-group value="{{ result }}" bind:change="radioOnChange">
     <van-cell-group >
         <van-cell
-        wx:for="{{ music_list }}"
+        wx:for="{{ playlists }}"
         wx:key="index"
-        title="{{item.section_name}}（备注：XXX）{{index}}首"
+        title="{{item.title}}（备注：{{item.comment}}）{{index}}首"
         clickable
-        data-name="{{index}}"
-        bind:click="toggle({{index}})"
+        data-name="{{item.sid}}"
+        bind:click="toggle({{item.sid}})"
         >
-        <van-radio name="{{index}}" checked-color="#13227a"/>
+        <van-radio name="{{item.sid}}" checked-color="#13227a"/>
         </van-cell>
     </van-cell-group>
     </van-radio-group>
     </van-dialog>
+    <van-toast id="van-toast" />
+    <van-dialog id="van-dialog" />
 </template>
 
 <script>
 import wepy from 'wepy';
+import Toast from '../styles/vant/toast/toast';
+import Dialog from '../styles/vant/dialog/dialog';
 
 export default class MyMusic_list extends wepy.page {
   config = {
@@ -165,12 +184,19 @@ export default class MyMusic_list extends wepy.page {
       'van-swipe-cell': '/styles/vant/swipe-cell/index',
       'van-checkbox': '/styles/vant/checkbox/index',
       'van-radio': '/styles/vant/radio/index',
-      'van-radio-group': '/styles/vant/radio-group/index'
+      'van-radio-group': '/styles/vant/radio-group/index',
+      "van-toast": "/styles/vant/toast/index"
     }
   };
   components = {};
 
   data = {
+    type:0,
+    isEdit:false,
+    img_base64:'',
+    music_list_url:'',
+    music_list_name:'',
+    comment_name:'',
     screenHeight:800,
     allSelect: false,
     playlist: [],
@@ -179,58 +205,120 @@ export default class MyMusic_list extends wepy.page {
     isDialogShow: false,
     is2DialogShow: false,
     result: '',
-    music_list: [
-      {
-        section_name: '办公场所歌单',
-        list: [
-          {
-            name: '歌曲一',
-            url: 'http://www.baidu.com',
-            author: '张三'
-          },
-          {
-            name: '歌曲二',
-            url: 'http://www.baidu.com',
-            author: '李四'
-          },
-          {
-            name: '歌曲三',
-            url: 'http://www.baidu.com',
-            author: '王五'
-          }
-        ]
-      },
-      {
-        section_name: '家庭歌单',
-        list: [
-          {
-            name: '歌曲一',
-            url: 'http://www.baidu.com',
-            author: '张三'
-          },
-          {
-            name: '歌曲二',
-            url: 'http://www.baidu.com',
-            author: '李四'
-          },
-          {
-            name: '歌曲三',
-            url: 'http://www.baidu.com',
-            author: '王五'
-          },
-          {
-            name: '歌曲四',
-            url: 'http://www.baidu.com',
-            author: '赵六'
-          }
-        ]
-      }
-    ]
+    music_list: []
   };
 
-  computed = {};
+  computed = {
+    playlists(){
+        return this.$parent.globalData.businessData.playlists
+    },
+    favorites(){
+        return this.$parent.globalData.businessData.favorites
+    },
+    img_url(){
+      return this.music_list_url ? this.music_list_url : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1559297222849&di=7e6117d3bc7e3a6aa7af3ebff4ab68de&imgtype=0&src=http%3A%2F%2Fpic.51yuansu.com%2Fpic3%2Fcover%2F02%2F21%2F00%2F59afc619caa9e_610.jpg"
+    }
+  };
 
   methods = {
+    addToPlayList(){
+      var tempArray = []
+      this.favorites.forEach(element => {
+        if (element.isSelected == true) 
+        {
+          console.log(element);
+          tempArray.push(element.sid)
+        } 
+      });
+      let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_item&p=json'
+      wepy.request({  
+          url: url,  
+          data: {
+            "usersid":this.$parent.globalData.businessData.userInfo.sid,
+            "sid":this.result,
+            "type":1,
+            "filesids":tempArray
+          },  
+          method: 'POST',   
+          success: function(res){ 
+              Toast('向歌单添加歌曲成功！');
+              console.log(res);
+          }  
+      });
+    },
+    change(options,e){
+      console.log(e);
+      if (options === '1') 
+      {
+        this.music_list_name = e.detail
+      } 
+      else 
+      {
+        this.comment_name = e.detail
+      }
+    },
+    chooseImg(){
+      let self = this;
+      wepy.chooseImage({
+        count:1,
+        sizeType: ['compressed'],
+        sourceType: ['album'],
+        success (res) {
+          // tempFilePath可以作为img标签的src属性显示图片
+          console.log(res);
+          self.music_list_url = res.tempFilePaths[0]
+          wepy.getFileSystemManager().readFile({
+            filePath:self.music_list_url,
+            encoding:'base64',
+            success:function (res) {
+              self.img_base64 = res.data
+              console.log(res);
+            }
+          })
+          self.$apply()
+          // const tempFilePaths = res.tempFilePaths
+        }
+      })
+    },
+    addPlayList(){
+      if (this.music_list_name=='') {
+        Toast('请输入歌单名称');
+        return
+      }
+      if (this.comment_name=='') {
+        Toast('请输入备注名称');
+        return
+      }
+      if (this.img_base64=='') {
+        Toast('请选择图片');
+        return
+      }
+      let self = this;
+      let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan&p=json'
+      wepy.request({  
+          url: url,  
+          data: {
+            "usersid":this.$parent.globalData.businessData.userInfo.sid,
+            "sid":'',
+            "type":this.isEdit == true ? 2:1,
+            "title":this.music_list_name,
+            "comment":this.comment_name,
+            "img":this.img_base64
+          },  
+          method: 'POST',   
+          success: function(res){ 
+              if (self.isEdit) 
+              {
+                Toast('修改歌单成功！');
+              } 
+              else 
+              {
+                Toast('创建歌单成功！');
+              }
+              console.log(res);
+          }  
+      });
+    },
     addToMyMusicList() {
       this.is2DialogShow = true;
     },
@@ -240,7 +328,7 @@ export default class MyMusic_list extends wepy.page {
     toggle(index) {
       this.result = index;
     },
-    onCellClose(event) {
+    onCellClose(item,event) {
       let self = this;
       const { position, instance } = event.detail;
       switch (position) {
@@ -253,16 +341,16 @@ export default class MyMusic_list extends wepy.page {
           self.allSelect = false;
           break;
         case 'right':
-          // Dialog.confirm({
-          // message: '确定删除吗？'
-          // }).then(() => {
-          // instance.close();
-          // });
+          Dialog.confirm({
+          message: '确定删除吗？'
+          }).then(() => {
+          self.custom_del_playlist(instance,item)
+          });
           break;
       }
     },
     selectSingle(index) {
-      var item = this.playlist[index];
+      var item = this.$parent.globalData.businessData.favorites[index];
       item.isSelected = !item.isSelected;
       this.allSelect = this.custom_checkAllSelectedStatus();
     },
@@ -272,7 +360,7 @@ export default class MyMusic_list extends wepy.page {
       swipeCell.forEach(element => {
         element.open('left');
       });
-      this.playlist.forEach(element => {
+      this.$parent.globalData.businessData.favorites.forEach(element => {
         if (self.allSelect == true) {
           //对所有item反全选操作
           element.isSelected = false;
@@ -293,19 +381,78 @@ export default class MyMusic_list extends wepy.page {
     onDialogClose() {
       this.isDialogShow = false;
       this.is2DialogShow = false;
+      // this.music_list_name = ""
+      // this.comment_name = ""
     },
-    edit() {
+    edit(item) {
+      this.isEdit = true
+      this.music_list_name = item.title
+      this.comment_name = item.comment
       this.isDialogShow = true;
     },
-    playAndAddToPlayList() {},
+    playAndAddToPlayList(sid) {
+      this.$parent.globalData.cur_plist_list_sid = sid
+      this.$parent.globalData.playlist_needRefresh = true
+      this.$parent.globalData.cur_playlist = {}
+      wepy.switchTab({
+        url: '/pages/music_list'
+      })
+    },
     add() {
       this.isDialogShow = true;
     }
   };
-
+  custom_del_favlist(instance,item){
+    let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_fav&p=json'
+    wepy.request({  
+        url: url,  
+        data: {
+          "usersid":this.$parent.globalData.businessData.userInfo.sid,
+          "filesid":item.filesid,
+          "type":3
+        },  
+        method: 'POST',   
+        success: function(res){ 
+            if (res.data.status == 1) 
+            {
+              Toast('删除收藏成功！');
+            } 
+            else 
+            {
+              Toast('删除收藏失败！');
+            }
+            instance.close();
+            console.log(res);
+        }  
+    });
+  }
+  custom_del_playlist(instance,item){
+    let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan&p=json'
+    wepy.request({  
+        url: url,  
+        data: {
+          "usersid":this.$parent.globalData.businessData.userInfo.sid,
+          "sid":item.sid,
+          "type":3
+        },  
+        method: 'POST',   
+        success: function(res){ 
+            if (res.data.status == 1) 
+            {
+              Toast('删除歌单成功！');
+            } 
+            else 
+            {
+              Toast('删除歌单失败！');
+            }
+            instance.close();
+            console.log(res);
+        }  
+    });
+  }
   custom_checkAllSelectedStatus() {
     var flag = true;
-    this.playlist.forEach(element => {
+    this.$parent.globalData.businessData.favorites.forEach(element => {
       if (element.isSelected == false) {
         flag = false;
       }
@@ -320,6 +467,8 @@ export default class MyMusic_list extends wepy.page {
     let self = this;
     wepy.getSystemInfo({
         success(res){
+            console.log("screenHeight:"+res.windowHeight);
+            console.log("screenWidth:"+res.windowWidth);
             self.screenHeight = (res.windowHeight-44)/(res.windowWidth/750)
             self.$apply()
         }
