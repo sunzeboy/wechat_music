@@ -67,7 +67,10 @@ export default class extends wepy.app {
   }
 
   globalData = {
+    backgroundAudioManager:Object,
+    playlist_needRefresh:false,
     cur_plist_list_sid:0,
+    cur_playlist:{},
     screenHeight:0,
     screenWidth:0,
     businessData:{},
@@ -84,6 +87,7 @@ export default class extends wepy.app {
     wepy.setStorageSync('sid', options.query.sid);//存储openid  
     // this.getUserInfo()
     this.login()
+    this.play()
     let self = this
     wepy.getSystemInfo({
         success(res){
@@ -92,7 +96,33 @@ export default class extends wepy.app {
         }
     })
   }
-
+  play(){
+    let self = this
+    this.backgroundAudioManager = wx.getBackgroundAudioManager()
+    this.backgroundAudioManager.onTimeUpdate(()=>{
+      self.duration = self.backgroundAudioManager.duration
+      self.currentTime = self.backgroundAudioManager.currentTime
+      self.$apply()
+    })
+    this.backgroundAudioManager.onEnded(()=>{
+      wepy.showToast({
+        title: '播放结束',
+      });
+      this.custom_next()
+    })
+    this.backgroundAudioManager.onNext(()=>{
+      wepy.showToast({
+        title: '下一首',
+      });
+      this.custom_next()
+    })
+    this.backgroundAudioManager.onPrev(()=>{
+      wepy.showToast({
+        title: '上一首',
+      });
+      this.custom_previous()
+    })
+  }
   login() {
     let self = this
     wepy.login({
