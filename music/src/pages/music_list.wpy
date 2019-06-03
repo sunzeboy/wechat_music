@@ -146,7 +146,7 @@
             <van-cell title="{{section.title}}" class="section">
             </van-cell>
             <block wx:for-items="{{section.items}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-              <van-cell title="{{item.title}}" custom-class="{{index == selectedIndex ? 'selected':'normal'}}" size="large" value="歌手：{{item.artist}}" label="专辑：{{item.album}}" @tap="select2({{sec}},{{index}})" >
+              <van-cell title="{{item.title}}" custom-class="{{(index == sel_row && sec == sel_sec) ? 'selected':'normal'}}" size="large" value="歌手：{{item.artist}}" label="专辑：{{item.album}}" @tap="select2({{sec}},{{index}})" >
                 <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#13227a" size="20px" @tap.stop="like2({{item}},{{sec}},{{index}})"/>
               </van-cell>
             </block>
@@ -340,6 +340,8 @@
           const element = this.playlist.sections[i];
           countIndex += element.items.length
         }
+        this.sel_sec = sec
+        this.sel_row = row
         this.selectedIndex = countIndex + row
         this.$parent.globalData.businessData.selectedIndex = this.selectedIndex
         this.custom_play()
@@ -399,8 +401,8 @@
           url: url,  
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
-            "title":this.custom_selectedName(),
-            "message":"bbb",
+            "title": 'BBC' + this.custom_selectedName(),
+            "message":"",
             "filesid":filesid
           },  
           method: 'POST',   
@@ -470,7 +472,7 @@
       for (let index = 0; index < this.playlist.sections.length; index++) {
         const element = this.playlist.sections[index];
         row += element.items.length
-        if (row > this.selectedIndex || row == this.selectedIndex) {
+        if (row > this.selectedIndex) {
           this.sel_sec = sec
           this.sel_row = this.selectedIndex-(row-element.items.length)
           break;

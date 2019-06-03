@@ -38,7 +38,8 @@
                 </van-collapse> -->
                 <block wx:for-items="{{playlists}}" wx:for-index="index" wx:key="index" wx:for-item="item">
                     <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}"  async-close bind:close="onCellClose(1,{{item}})">
-                        <van-cell title="{{/*index+1 + '.' +*/ item.title}}" icon="http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_img&sid={{item.sid}}" value="{{item.cnt}}首" label="备注：{{item.comment}}" class="section">
+                        <van-cell title="{{/*index+1 + '.' +*/ item.title}}"  value="{{item.cnt}}首" label="备注：{{item.comment}}" class="section">
+                            <van-icon slot="icon" name="http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_img&sid={{item.sid}}" style="margin-right:15px;" class="custom-icon"  size="40px"/>
                             <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#13227a" size="20px" style="margin-left:15px;" @tap="playAndAddToPlayList({{item.sid}})"/>
                             <van-icon slot="right-icon" name="edit" class="custom-icon" color="#13227a" size="20px" style="margin-left:25px;" @tap="edit({{item}})"/>
                         </van-cell>
