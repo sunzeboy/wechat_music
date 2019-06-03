@@ -127,31 +127,28 @@
   text-align: center;
   background-color:#13227a;
 }
+.selected{
+  background-color:#bda8bd !important;
+}
+.normal{
+
+}
 </style>
 
 <template>
         <scroll-view scroll-y style="height: {{listHeight}}px;">
-          <!-- <view wx:if="{{ $parent.globalData.cur_plist_list_sid > 0 }}" class="van-card__title title-class">{{ title }}</view> -->
           <block wx:if="{{ type1Show }}" wx:for-items="{{playlist}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-            <van-cell value="歌手：{{item.artist}}" size="large"  label="专辑：{{item.album}}" is-link>
-              <view slot="title">
-                <view class="van-cell-text">{{item.title}}</view>
-                <van-tag wx:if="{{index == selectedIndex}}" type="danger">播放中...</van-tag>
-              </view>
+            <van-cell title="{{item.title}}" custom-class="{{index == selectedIndex ? 'selected':'normal'}}" value="歌手：{{item.artist}}" size="large"  label="专辑：{{item.album}}" @tap="select1({{index}})" >
+              <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#13227a" size="20px" @tap.stop="like1({{item}},{{index}})"/>
             </van-cell>
           </block>
-          <block wx:if="{{ type2Show }}" wx:for-items="{{playlist.sections}}" wx:for-index="index" wx:key="index" wx:for-item="section">
+          <block wx:if="{{ type2Show }}" wx:for-items="{{playlist.sections}}" wx:for-index="sec" wx:key="sec" wx:for-item="section">
             <van-cell title="{{section.title}}" class="section">
             </van-cell>
             <block wx:for-items="{{section.items}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-                <van-cell size="large" value="歌手：{{item.artist}}" label="专辑：{{item.album}}" >
-                  <!-- <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" class="custom-icon" color="#13227a" size="20px" @tap="like({{item}})"/>
-                  <van-tag wx:if="{{item.sid == playlist.sections[this.sel_sec].items[this.sel_row].sid}}" type="danger">播放中...</van-tag> -->
-                  <view slot="title">
-                    <view class="van-cell-text">{{item.title}}</view>
-                    <van-tag wx:if="{{item.sid == cur_sid}}" type="danger">播放中...</van-tag>
-                  </view>
-                </van-cell>
+              <van-cell title="{{item.title}}" custom-class="{{index == selectedIndex ? 'selected':'normal'}}" size="large" value="歌手：{{item.artist}}" label="专辑：{{item.album}}" @tap="select2({{sec}},{{index}})" >
+                <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#13227a" size="20px" @tap.stop="like2({{item}},{{sec}},{{index}})"/>
+              </van-cell>
             </block>
           </block>
         </scroll-view>
@@ -190,6 +187,7 @@
       usingComponents: {
         'van-cell': '/styles/vant/cell/index',
         'van-tag': '/styles/vant/tag/index',
+        "van-icon": "/styles/vant/icon/index",
         "van-toast": "/styles/vant/toast/index"
       }
     }
@@ -198,6 +196,7 @@
     }
 
     data = {
+      favorites:[],
       sel_sec:0,
       sel_row:0,
       backgroundAudioManager:Object,
@@ -221,8 +220,6 @@
         }
       },
       type1Show(){
-        console.log('type1Show');
-        console.log(this.$parent.globalData.cur_plist_list_sid);
         return this.$parent.globalData.cur_plist_list_sid > 0
       },
       type2Show(){
@@ -285,6 +282,68 @@
     }
 
     methods = {
+      like1(item,index){
+        let self = this
+        Toast.loading({
+          mask: true,
+          message: '加载中...'
+        });
+        let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_fav&p=json'
+        wepy.request({  
+          url: url,  
+          data: {
+            "usersid":this.$parent.globalData.businessData.userInfo.sid,
+            "type":self.playlist[index].isFavorite == true ? 3:1,
+            "filesid":item.sid
+          },  
+          method: 'POST',   
+          success: function(res){ 
+            console.log(res);
+            self.playlist[index].isFavorite = !self.playlist[index].isFavorite
+            self.$apply()
+            Toast.clear()
+          }  
+        });
+      },
+      like2(item,sec,row){
+        let self = this
+        Toast.loading({
+          mask: true,
+          message: '加载中...'
+        });
+        let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_fav&p=json'
+        wepy.request({  
+          url: url,  
+          data: {
+            "usersid":this.$parent.globalData.businessData.userInfo.sid,
+            "type":self.playlist.sections[sec].items[row].isFavorite == true ? 3:1,
+            "filesid":item.filesid
+          },  
+          method: 'POST',   
+          success: function(res){ 
+            console.log(res);
+            self.playlist.sections[sec].items[row].isFavorite = !self.playlist.sections[sec].items[row].isFavorite
+            self.$apply()
+            Toast.clear()
+          }  
+        });
+      },
+      select1(index){
+        this.selectedIndex = index
+        this.$parent.globalData.businessData.selectedIndex = this.selectedIndex
+        this.custom_play()
+      },
+      select2(sec,row){
+        var countIndex = 0
+        for (let i = 0; i < sec; i++) 
+        {
+          const element = this.playlist.sections[i];
+          countIndex += element.items.length
+        }
+        this.selectedIndex = countIndex + row
+        this.$parent.globalData.businessData.selectedIndex = this.selectedIndex
+        this.custom_play()
+      },
       drag (e) {
         this.backgroundAudioManager.seek(e.detail.value)
       },
@@ -319,14 +378,21 @@
     
     custom_uploadLog(){
       console.log("custom_uploadLog");
+      console.log(this.playlist);
+      console.log(this.selectedIndex);
+      console.log(this.sel_sec);
+      console.log(this.sel_row);
+      
       let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_addlog&p=json'
       var filesid = ''
       if (this.type1Show == true) 
       {
+        if (this.playlist.length === 0) return
         filesid = this.playlist[this.selectedIndex].filesid
       } 
       else 
       {
+        if (Object.keys(this.playlist).length === 0) return
         filesid = this.playlist.sections[this.sel_sec].items[this.sel_row].filesid
       }
       wepy.request({  
@@ -353,6 +419,7 @@
         } 
         else 
         {
+          if (Object.keys(this.playlist).indexOf('sections') != -1) return ''
           return this.playlist[this.selectedIndex].artist
         }
       } 
@@ -371,7 +438,6 @@
       
     }
     custom_selectedName () {
-      console.log('custom_selectedName');
       console.log(this.playlist);
       if (this.type1Show == true) 
       {
@@ -381,6 +447,7 @@
         } 
         else 
         {
+          if (Object.keys(this.playlist).indexOf('sections') != -1) return ''
           return this.playlist[this.selectedIndex].title
         }
       } 
@@ -421,6 +488,7 @@
         } 
         else 
         {
+          if (Object.keys(this.playlist).indexOf('sections') != -1) return ''
           let fileid = this.playlist[this.selectedIndex].fileid
           let a = fileid.substring(0,2)
           let b = fileid.substring(2,4)
@@ -458,14 +526,14 @@
             this.selectedIndex  = this.selectedIndex + 1
         }
         console.log('this.selectedIndex:'+this.selectedIndex);
-        
+        this.$parent.globalData.businessData.selectedIndex = this.selectedIndex
         this.custom_play()
     }
     custom_play () {
-      this.custom_uploadLog()
       this.backgroundAudioManager.title = this.custom_selectedName()
       this.backgroundAudioManager.singer = this.custom_selectedAuthor()
       this.backgroundAudioManager.src = this.custom_selectedUrl()
+      this.custom_uploadLog()
     }
     custom_previous () {
       if (this.selectedIndex == 0) 
@@ -476,7 +544,58 @@
       {
           this.selectedIndex = this.selectedIndex - 1
       }
+      this.$parent.globalData.businessData.selectedIndex = this.selectedIndex
       this.custom_play()
+    }
+    custom_refresh_fav(options){
+      let self = this;
+      let url =
+        'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_favlist&usersid=' + this.$parent.globalData.businessData.userInfo.sid
+      wepy.request({
+        url: url,
+        data: {},
+        method: 'GET',
+        success: function(res) {
+          self.favorites = res.data.items;
+          self.playlist = self.$parent.globalData.playlist
+          self.selectedIndex = self.$parent.globalData.selectedIndex
+          let json = JSON.stringify(self.favorites)
+          if (self.type1Show) 
+          {
+            for (let i = 0; i < self.playlist.length; i++) {
+              const element = self.playlist[i];
+              if (json.indexOf(element.sid) != -1) 
+              {
+                element.isFavorite = true
+              } 
+              else 
+              {
+                element.isFavorite = false
+              }
+            }
+          } 
+          else 
+          {
+            for (let i = 0; i < self.playlist.sections.length; i++) 
+            {
+              const sections = self.playlist.sections[i];
+              for (let j = 0; j < sections.items.length; j++) 
+              {
+                const element = sections.items[j];
+                if (json.indexOf(element.filesid) != -1) 
+                {
+                  element.isFavorite = true
+                } 
+                else 
+                {
+                  element.isFavorite = false
+                }
+              }
+            }
+          }
+          self.$apply();
+        }
+      });
     }
     format(t) {
         let time = Math.floor(t / 60) >= 10 ? Math.floor(t / 60) : '0' + Math.floor(t / 60)
@@ -491,82 +610,66 @@
         self.currentTime = self.backgroundAudioManager.currentTime
         self.$apply()
       })
-      this.backgroundAudioManager.onEnded(()=>{
-        wepy.showToast({
-          title: '播放结束',
-        });
-        this.custom_next()
-      })
-      this.backgroundAudioManager.onNext(()=>{
-        wepy.showToast({
-          title: '下一首',
-        });
-        this.custom_next()
-      })
-      this.backgroundAudioManager.onPrev(()=>{
-        wepy.showToast({
-          title: '上一首',
-        });
-        this.custom_previous()
-      })
     }
     onShow() {
       if (this.$parent.globalData.playlist_needRefresh == true) 
       {
-        this.custom_updateSid()
+        this.custom_refresh_fav()
         this.$parent.globalData.playlist_needRefresh = false
       }
     }
 
     custom_updateSid() {
-      console.log(this.$parent.globalData.cur_playlist);      
-      if (this.$parent.globalData.cur_playlist.sections) 
-      {
-        console.log("custom_updateSid1");
-        this.playlist = this.$parent.globalData.cur_playlist
-        return
-      }
-      this.playlist = []
-      console.log("custom_updateSid");
-      let self = this
-      let sid = this.$parent.globalData.cur_plist_list_sid
-      console.log(sid);
-      Toast.loading({
-        mask: true,
-        message: '加载中...'
-      });
-      // let url = 'http://47.96.191.22/client/index.php?m=bbc&c=index&a=s_playlist&p=json&sid=' + sid
-      let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_itemlist&p=json'
-      wepy.request({  
-          url: url,  
-          data: {
-            "usersid":this.$parent.globalData.businessData.userInfo.sid,
-            "playlistsid":sid
-          },  
-          method: 'GET',   
-          success: function(res){ 
-              Toast.clear()
-              if (res.data.status == 1) 
-              {
-                console.log('aaaaaa');
-                console.log(res.data.items)
-                self.playlist = res.data.items
-                self.$apply()
-                if (self.playlist.length) 
-                {
-                  self.custom_play()
-                }
-                else
-                {
-                  Toast("暂无数据！") 
-                }
-              } 
-              else 
-              {
-               Toast("请求失败！") 
-              }
-          }  
-      });
+      this.custom_refresh_fav()
+      
+      // console.log(this.$parent.globalData.cur_playlist);      
+      // if (this.$parent.globalData.cur_playlist.sections) 
+      // {
+      //   console.log("custom_updateSid1");
+      //   this.playlist = this.$parent.globalData.cur_playlist
+      //   return
+      // }
+      // this.playlist = []
+      // console.log("custom_updateSid");
+      // let self = this
+      // let sid = this.$parent.globalData.cur_plist_list_sid
+      // console.log(sid);
+      // Toast.loading({
+      //   mask: true,
+      //   message: '加载中...'
+      // });
+      // // let url = 'http://47.96.191.22/client/index.php?m=bbc&c=index&a=s_playlist&p=json&sid=' + sid
+      // let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_itemlist&p=json'
+      // wepy.request({  
+      //     url: url,  
+      //     data: {
+      //       "usersid":this.$parent.globalData.businessData.userInfo.sid,
+      //       "playlistsid":sid
+      //     },  
+      //     method: 'GET',   
+      //     success: function(res){ 
+      //         Toast.clear()
+      //         if (res.data.status == 1) 
+      //         {
+      //           console.log('aaaaaa');
+      //           console.log(res.data.items)
+      //           self.playlist = res.data.items
+      //           self.$apply()
+      //           if (self.playlist.length) 
+      //           {
+      //             self.custom_play()
+      //           }
+      //           else
+      //           {
+      //             Toast("暂无数据！") 
+      //           }
+      //         } 
+      //         else 
+      //         {
+      //          Toast("请求失败！") 
+      //         }
+      //     }  
+      // });
     }
   }
 </script>

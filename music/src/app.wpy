@@ -67,43 +67,27 @@ export default class extends wepy.app {
   }
 
   globalData = {
+    sel_sec:0,
+    sel_row:0,
+    selectedIndex:0,
     backgroundAudioManager:Object,
     playlist_needRefresh:false,
     cur_plist_list_sid:0,
     cur_playlist:{},
+    playlist:[],
     screenHeight:0,
     screenWidth:0,
     businessData:{},
-    userInfo: null
-  }
-
-  constructor () {
-    super()
-    this.use('requestfix')
-  }
-
-  onLaunch(options) {
-    // this.testAsync()
-    wepy.setStorageSync('sid', options.query.sid);//存储openid  
-    // this.getUserInfo()
-    this.login()
-    this.play()
-    let self = this
-    wepy.getSystemInfo({
-        success(res){
-            self.globalData.screenHeight = res.windowHeight
-            self.globalData.screenWidth = res.windowWidth
-        }
-    })
-  }
-  play(){
+    userInfo: null,
+    custom_play () {
+      this.custom_uploadLog()
+      this.backgroundAudioManager.title = this.custom_selectedName()
+      this.backgroundAudioManager.singer = this.custom_selectedAuthor()
+      this.backgroundAudioManager.src = this.custom_selectedUrl()
+    },
+    play(){
     let self = this
     this.backgroundAudioManager = wx.getBackgroundAudioManager()
-    this.backgroundAudioManager.onTimeUpdate(()=>{
-      self.duration = self.backgroundAudioManager.duration
-      self.currentTime = self.backgroundAudioManager.currentTime
-      self.$apply()
-    })
     this.backgroundAudioManager.onEnded(()=>{
       wepy.showToast({
         title: '播放结束',
@@ -122,7 +106,205 @@ export default class extends wepy.app {
       });
       this.custom_previous()
     })
+  },
+  custom_uploadLog(){
+      console.log("custom_uploadLog");
+      let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_addlog&p=json'
+      var filesid = ''
+      console.log(this.playlist);
+      if (this.cur_plist_list_sid > 0) 
+      {
+        if (this.playlist.length === 0) return
+        filesid = this.playlist[this.selectedIndex].fileid
+      } 
+      else 
+      {
+        if (Object.keys(this.playlist).length === 0) return
+        filesid = this.playlist.sections[this.sel_sec].items[this.sel_row].filesid
+      }
+      wepy.request({  
+          url: url,  
+          data: {
+            "usersid":this.businessData.userInfo.sid,
+            "title":this.backgroundAudioManager.title,
+            "message":"bbb",
+            "filesid":filesid
+          },  
+          method: 'POST',   
+          success: function(res){ 
+              console.log(res);
+              // Toast('上传log成功！');
+          }  
+      });
+    },
+    custom_selectedAuthor () {
+      if (this.cur_plist_list_sid > 0) 
+      {
+        if (this.playlist.length == 0) 
+        {
+          return ''
+        } 
+        else 
+        {
+          return this.playlist[this.selectedIndex].artist
+        }
+      } 
+      else 
+      {
+        if (this.playlist.sections == undefined) 
+        {
+          return '' 
+        } 
+        else 
+        {
+         this.custom_sec_index_cul()
+          return this.playlist.sections[this.sel_sec].items[this.sel_row].artist
+        }
+      }
+      
+    },
+    custom_selectedName () {
+      if (this.cur_plist_list_sid > 0) 
+      {
+        if (this.playlist.length == 0) 
+        {
+          return ''
+        } 
+        else 
+        {
+          return this.playlist[this.selectedIndex].title
+        }
+      } 
+      else 
+      {
+        if (this.playlist.sections == undefined) 
+        {
+          return '' 
+        } 
+        else 
+        {
+         this.custom_sec_index_cul()
+          return this.playlist.sections[this.sel_sec].items[this.sel_row].title
+        }
+      }
+    },
+    custom_sec_index_cul(){
+      var sec = 0
+      var row = 0
+      for (let index = 0; index < this.playlist.sections.length; index++) {
+        const element = this.playlist.sections[index];
+        row += element.items.length
+        if (row > this.selectedIndex || row == this.selectedIndex) {
+          this.sel_sec = sec
+          this.sel_row = this.selectedIndex-(row-element.items.length)
+          break;
+        }
+        sec += 1;
+      }
+    },
+    custom_selectedUrl () {
+      var httpUrl = "http://47.96.191.22/upload/music/"
+      if (this.cur_plist_list_sid > 0) 
+      {
+        if (this.playlist.length == 0) 
+        {
+          return ''
+        } 
+        else 
+        {
+          let fileid = this.playlist[this.selectedIndex].fileid
+          let a = fileid.substring(0,2)
+          let b = fileid.substring(2,4)
+          httpUrl = httpUrl + a + '/' + b + '/' + fileid + '.mp3'
+          return httpUrl
+        }
+      } 
+      else 
+      {
+        if (this.playlist.sections == undefined) 
+        {
+          return ''
+        } 
+        else 
+        {
+          this.custom_sec_index_cul()
+          let fileid = this.playlist.sections[this.sel_sec].items[this.sel_row].fileid
+          let a = fileid.substring(0,2)
+          let b = fileid.substring(2,4)
+          httpUrl = httpUrl + a + '/' + b + '/' + fileid + '.mp3'
+          console.log(httpUrl);
+          return httpUrl
+        }
+      }
+    },
+    custom_next () {
+        if (this.selectedIndex == this.playlistCount() - 1) 
+        {
+            this.selectedIndex = 0
+        } 
+        else 
+        {
+            this.selectedIndex  = this.selectedIndex + 1
+        }
+        console.log('this.selectedIndex:'+this.selectedIndex);
+        
+        this.custom_play()
+    },
+    
+    custom_previous () {
+      if (this.selectedIndex == 0) 
+      {
+          this.selectedIndex = this.playlistCount() - 1
+      } 
+      else 
+      {
+          this.selectedIndex = this.selectedIndex - 1
+      }
+      this.custom_play()
+    },
+    playlistCount () {
+      if (this.cur_plist_list_sid > 0 || this.playlist.length == 0) 
+      {
+        return this.playlist.length;
+      } 
+      else 
+      {
+        if (this.playlist.sections) 
+        {
+          var i = 0
+          this.playlist.sections.forEach(element => {
+            i+=element.items.length
+          });
+          return i
+        } 
+        else 
+        {
+          return 0
+        }
+      }
+    }
   }
+
+  constructor () {
+    super()
+    this.use('requestfix')
+  }
+
+  onLaunch(options) {
+    // this.testAsync()
+    wepy.setStorageSync('sid', options.query.sid);//存储openid  
+    // this.getUserInfo()
+    this.login()
+    this.globalData.play()
+    let self = this
+    wepy.getSystemInfo({
+        success(res){
+            self.globalData.screenHeight = res.windowHeight
+            self.globalData.screenWidth = res.windowWidth
+        }
+    })
+  }
+  
   login() {
     let self = this
     wepy.login({

@@ -37,10 +37,10 @@
                     </block>
                 </van-collapse> -->
                 <block wx:for-items="{{playlists}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-                    <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}" async-close bind:close="onCellClose({{item}})">
-                        <van-cell title="{{/*index+1 + '.' +*/ item.title}}" icon="http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_img&sid={{item.sid}}" label="备注：{{item.comment}}" class="section">
-                            <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#13227a" size="20px" @tap="playAndAddToPlayList({{item.sid}})"/>
-                            <van-icon slot="right-icon" name="edit" class="custom-icon" color="#13227a" size="20px" style="margin-left:15px;" @tap="edit({{item}})"/>
+                    <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}"  async-close bind:close="onCellClose(1,{{item}})">
+                        <van-cell title="{{/*index+1 + '.' +*/ item.title}}" icon="http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_img&sid={{item.sid}}" value="{{item.cnt}}首" label="备注：{{item.comment}}" class="section">
+                            <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#13227a" size="20px" style="margin-left:15px;" @tap="playAndAddToPlayList({{item.sid}})"/>
+                            <van-icon slot="right-icon" name="edit" class="custom-icon" color="#13227a" size="20px" style="margin-left:25px;" @tap="edit({{item}})"/>
                         </van-cell>
                         <view slot="right" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #f44;" >删除</view>
                     </van-swipe-cell>
@@ -51,9 +51,9 @@
         </van-tab>
         <van-tab title="我的收藏">
             <view style="width: 100%;height: {{screenHeight}}rpx;background-color: #fff;">
+              <scroll-view scroll-y style="height: {{screenHeight-90}}rpx;">
                 <block wx:for-items="{{favorites}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-                
-                    <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}" left-width="{{ 65 }}" async-close bind:close="onCellClose({{item}})">
+                    <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}" left-width="{{ 65 }}" async-close bind:close="onCellClose(2,{{item}})">
                         <view slot="left" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #fff;" >
                             <van-checkbox
                             style="display: inline-block;"
@@ -64,7 +64,7 @@
                             </van-checkbox>
                         </view>
                         <van-cell-group>
-                            <van-cell value="歌手：{{item.artist}}" size="large"  label="专辑：{{item.album}}" is-link>
+                            <van-cell value="歌手：{{item.artist}}" size="large"  label="专辑：{{item.album}}">
                             <view slot="title">
                             <view class="van-cell-text">{{item.title}}</view>
                             <van-tag wx:if="{{index == selectedIndex}}" type="danger">播放中...</van-tag>
@@ -74,6 +74,7 @@
                         <view slot="right" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #f44;" >删除</view>
                     </van-swipe-cell>
                 </block>
+              </scroll-view>
                 <view class="weui-footer weui-footer_fixed-bottom">
                     <van-row>
                         <van-col span="8">
@@ -92,9 +93,9 @@
                             </view>
                         </van-col>
                         <van-col span="8">
-                            <view style="display: inline-block;height: 100%;line-height: 40px;width: 33%;color: #13227a;">
+                            <!-- <view style="display: inline-block;height: 100%;line-height: 40px;width: 33%;color: #13227a;">
                                 移除收藏
-                            </view>
+                            </view> -->
                         </van-col>
                     </van-row>
                 </view>
@@ -147,7 +148,7 @@
         <van-cell
         wx:for="{{ playlists }}"
         wx:key="index"
-        title="{{item.title}}（备注：{{item.comment}}）{{index}}首"
+        title="{{item.title}}（{{item.cnt}}首）"
         clickable
         data-name="{{item.sid}}"
         bind:click="toggle({{item.sid}})"
@@ -200,6 +201,8 @@ export default class MyMusic_list extends wepy.page {
     screenHeight:800,
     allSelect: false,
     playlist: [],
+    playlists:[],
+    favorites:[],
     activeNames: '1',
     addNum: 1,
     isDialogShow: false,
@@ -209,12 +212,6 @@ export default class MyMusic_list extends wepy.page {
   };
 
   computed = {
-    playlists(){
-        return this.$parent.globalData.businessData.playlists
-    },
-    favorites(){
-        return this.$parent.globalData.businessData.favorites
-    },
     img_url(){
       return this.music_list_url ? this.music_list_url : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1559297222849&di=7e6117d3bc7e3a6aa7af3ebff4ab68de&imgtype=0&src=http%3A%2F%2Fpic.51yuansu.com%2Fpic3%2Fcover%2F02%2F21%2F00%2F59afc619caa9e_610.jpg"
     }
@@ -222,12 +219,13 @@ export default class MyMusic_list extends wepy.page {
 
   methods = {
     addToPlayList(){
+      var self = this
       var tempArray = []
       this.favorites.forEach(element => {
         if (element.isSelected == true) 
         {
           console.log(element);
-          tempArray.push(element.sid)
+          tempArray.push(element.filesid)
         } 
       });
       let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_item&p=json'
@@ -242,6 +240,7 @@ export default class MyMusic_list extends wepy.page {
           method: 'POST',   
           success: function(res){ 
               Toast('向歌单添加歌曲成功！');
+              self.custom_refresh_gedan()
               console.log(res);
           }  
       });
@@ -315,12 +314,22 @@ export default class MyMusic_list extends wepy.page {
               {
                 Toast('创建歌单成功！');
               }
+              self.isEdit = false
+              self.$apply()
+              self.custom_refresh_gedan()
               console.log(res);
           }  
       });
     },
     addToMyMusicList() {
-      this.is2DialogShow = true;
+      if (this.playlists.length == 0) 
+      {
+        Toast('您还没有歌单，请新建您的歌单！')
+      } 
+      else 
+      {
+        this.is2DialogShow = true;
+      }
     },
     radioOnChange(event) {
       this.result = event.detail;
@@ -328,8 +337,9 @@ export default class MyMusic_list extends wepy.page {
     toggle(index) {
       this.result = index;
     },
-    onCellClose(item,event) {
+    onCellClose(type,item,event) {
       let self = this;
+      console.log(item);
       const { position, instance } = event.detail;
       switch (position) {
         case 'left':
@@ -344,13 +354,20 @@ export default class MyMusic_list extends wepy.page {
           Dialog.confirm({
           message: '确定删除吗？'
           }).then(() => {
-          self.custom_del_playlist(instance,item)
+            if (type === '1') 
+            {
+              self.custom_del_playlist(instance,item)
+            } 
+            else if (type === '2') 
+            {
+              self.custom_del_favlist(instance,item)
+            }
           });
           break;
       }
     },
     selectSingle(index) {
-      var item = this.$parent.globalData.businessData.favorites[index];
+      var item = this.favorites[index];
       item.isSelected = !item.isSelected;
       this.allSelect = this.custom_checkAllSelectedStatus();
     },
@@ -360,7 +377,7 @@ export default class MyMusic_list extends wepy.page {
       swipeCell.forEach(element => {
         element.open('left');
       });
-      this.$parent.globalData.businessData.favorites.forEach(element => {
+      this.favorites.forEach(element => {
         if (self.allSelect == true) {
           //对所有item反全选操作
           element.isSelected = false;
@@ -386,23 +403,63 @@ export default class MyMusic_list extends wepy.page {
     },
     edit(item) {
       this.isEdit = true
-      this.music_list_name = item.title
-      this.comment_name = item.comment
+      this.music_list_name = item.title.replace(/[\r\n]/g,"");
+      this.comment_name = item.comment.replace(/[\r\n]/g,"");
+      this.music_list_url = "http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_img&sid="+item.sid
       this.isDialogShow = true;
     },
     playAndAddToPlayList(sid) {
       this.$parent.globalData.cur_plist_list_sid = sid
       this.$parent.globalData.playlist_needRefresh = true
       this.$parent.globalData.cur_playlist = {}
-      wepy.switchTab({
-        url: '/pages/music_list'
-      })
+      this.$parent.globalData.playlist = []
+      let self = this
+      Toast.loading({
+        mask: true,
+        message: '加载中...'
+      });
+      let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_itemlist&p=json'
+      wepy.request({  
+          url: url,  
+          data: {
+            "usersid":this.$parent.globalData.businessData.userInfo.sid,
+            "playlistsid":sid
+          },  
+          method: 'GET',   
+          success: function(res){ 
+              Toast.clear()
+              if (res.data.status == 1) 
+              {
+
+                if (res.data.items.length > 0) 
+                {
+                  self.$parent.globalData.playlist = res.data.items
+                  self.$parent.$pages['/pages/music_list'].data.playlist = res.data.items
+                  self.$parent.globalData.custom_play()
+                  Toast('设置为播放列表成功！')
+                } 
+                else 
+                {
+                  Toast('设置为播放列表失败！当前歌单没有任何歌曲')
+                }
+              } 
+              else 
+              {
+                Toast("设置为播放列表失败！") 
+              }
+          }  
+      });
     },
     add() {
+      this.music_list_name = ''
+      this.comment_name = ''
+      this.music_list_url = ''
       this.isDialogShow = true;
     }
   };
   custom_del_favlist(instance,item){
+    console.log(item);
+    var self = this
     let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_fav&p=json'
     wepy.request({  
         url: url,  
@@ -422,11 +479,12 @@ export default class MyMusic_list extends wepy.page {
               Toast('删除收藏失败！');
             }
             instance.close();
-            console.log(res);
+            self.custom_refresh_fav()
         }  
     });
   }
   custom_del_playlist(instance,item){
+    var self = this
     let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan&p=json'
     wepy.request({  
         url: url,  
@@ -446,18 +504,48 @@ export default class MyMusic_list extends wepy.page {
               Toast('删除歌单失败！');
             }
             instance.close();
-            console.log(res);
+            self.custom_refresh_gedan()
         }  
     });
   }
   custom_checkAllSelectedStatus() {
     var flag = true;
-    this.$parent.globalData.businessData.favorites.forEach(element => {
+    this.favorites.forEach(element => {
       if (element.isSelected == false) {
         flag = false;
       }
     });
     return flag;
+  }
+
+  custom_refresh_gedan(){
+    let self = this;
+    let url =
+      'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedanlist&usersid=' + this.$parent.globalData.businessData.userInfo.sid
+    wepy.request({
+      url: url,
+      data: {},
+      method: 'GET',
+      success: function(res) {
+        self.playlists = res.data.items;
+        self.$apply();
+      }
+    });
+  }
+
+  custom_refresh_fav(){
+    let self = this;
+    let url =
+      'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_favlist&usersid=' + this.$parent.globalData.businessData.userInfo.sid
+    wepy.request({
+      url: url,
+      data: {},
+      method: 'GET',
+      success: function(res) {
+        self.favorites = res.data.items;
+        self.$apply();
+      }
+    });
   }
   events = {};
   onChange(e) {
@@ -473,19 +561,11 @@ export default class MyMusic_list extends wepy.page {
             self.$apply()
         }
     })
-    let sid = wepy.getStorageSync('sid') || 373;
-    let url =
-      'http://47.96.191.22/client/index.php?m=bbc&c=index&a=s_playlist&p=json&sid=' +
-      sid;
-    wepy.request({
-      url: url,
-      data: {},
-      method: 'GET',
-      success: function(res) {
-        self.playlist = res.data.items;
-        self.$apply();
-      }
-    });
+    
+  }
+  onShow(){
+    this.custom_refresh_gedan()
+    this.custom_refresh_fav()
   }
 }
 </script>

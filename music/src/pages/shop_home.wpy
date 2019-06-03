@@ -9,14 +9,14 @@
     <image style="width: 100%; height: 200px; background-color: #eeeeee;" src="http://www.selwell.cn/sgmicro/images/歌单编辑/u132.png"></image>
     <van-cell title="当前播放列表" class="section">
         <van-icon slot="right-icon" name="todo-list-o" class="custom-icon" color="#13227a" size="20px" @tap="dianMusic"/>
-        <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#13227a" size="20px" style="margin-left:15px;" @tap="playMusic"/>
+        <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#13227a" size="20px" style="margin-left:25px;" @tap="playMusic"/>
     </van-cell>
-    <block wx:for-items="{{playlist.sections}}" wx:for-index="index" wx:key="index" wx:for-item="section">
+    <block wx:for-items="{{playlist.sections}}" wx:for-index="sec" wx:key="sec" wx:for-item="section">
       <van-cell title="{{section.title}}" class="section">
       </van-cell>
       <block wx:for-items="{{section.items}}" wx:for-index="index" wx:key="index" wx:for-item="item">
           <van-cell title="{{item.title}}" size="large" value="歌手：{{item.artist}}" label="专辑：{{item.album}}" >
-            <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" class="custom-icon" color="#13227a" size="20px" @tap="like({{item}})"/>
+            <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#13227a" size="20px" @tap="like({{item}},{{sec}},{{index}})"/>
         </van-cell>
       </block>
     </block>
@@ -45,6 +45,7 @@
 
     data = {
         playlist:[],
+        favorites:[],
     }
 
     computed = {
@@ -64,14 +65,13 @@
         this.$parent.globalData.cur_playlist = this.playlist
         console.log(this.$parent.globalData.cur_playlist);
         this.$parent.globalData.playlist_needRefresh = true
-        setTimeout(() => {
-          wepy.switchTab({
-            url: '/pages/music_list'
-          })
-        }, 0);
+        this.$parent.globalData.playlist = this.playlist
+        this.$parent.$pages['/pages/music_list'].data.playlist = this.playlist
+        this.$parent.globalData.custom_play()
+        Toast('设置为播放列表成功！')
         
       },
-      like(item){
+      like(item,sec,row){
         let self = this
         Toast.loading({
           mask: true,
@@ -82,13 +82,13 @@
           url: url,  
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
-            "type":1,
+            "type":self.playlist.sections[sec].items[row].isFavorite == true ? 3:1,
             "filesid":item.filesid
           },  
           method: 'POST',   
           success: function(res){ 
             console.log(res);
-            self.playlist = res.data.playlist
+            self.playlist.sections[sec].items[row].isFavorite = !self.playlist.sections[sec].items[row].isFavorite
             self.$apply()
             Toast.clear()
           }  
@@ -99,8 +99,22 @@
     events = {
       
     }
-
-    onLoad(options) {
+    custom_refresh_fav(options){
+      let self = this;
+      let url =
+        'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_favlist&usersid=' + this.$parent.globalData.businessData.userInfo.sid
+      wepy.request({
+        url: url,
+        data: {},
+        method: 'GET',
+        success: function(res) {
+          self.favorites = res.data.items;
+          self.custom_refresh_playlist(options)
+          self.$apply();
+        }
+      });
+    }
+    custom_refresh_playlist(options){
       let self = this
       Toast.loading({
         mask: true,
@@ -118,11 +132,31 @@
           var p = res.data.playlist
           res.data.playlist.sections = res.data.playlist.sections.concat(res.data.addlist.sections)
           self.playlist = res.data.playlist
+          let json = JSON.stringify(self.favorites)
+          console.log(json);
+          for (let i = 0; i < self.playlist.sections.length; i++) {
+            const sections = self.playlist.sections[i];
+            for (let j = 0; j < sections.items.length; j++) {
+              const element = sections.items[j];
+              if (json.indexOf(element.filesid) != -1) 
+              {
+                console.log('element.isFavorite = true');
+                element.isFavorite = true
+              } 
+              else 
+              {
+                element.isFavorite = false
+              }
+            }
+          }
           console.log(self.playlist);
           self.$apply()
           Toast.clear()
         }  
       });
+    }
+    onLoad(options) {
+      this.custom_refresh_fav(options)
     }
   }
 </script>
