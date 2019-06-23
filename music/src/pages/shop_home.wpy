@@ -57,8 +57,10 @@
     methods = {
       dianMusic () {
         wepy.navigateTo({
-          url: '/pages/webview?thirdUrl='+'http://www.baidu.com'
+          // url: '/pages/webview?thirdUrl='+'http://www.baidu.com'
+          url: '/pages/dian_music_list'
         })
+
       },
       playMusic () {
         this.$parent.globalData.cur_plist_list_sid = -1

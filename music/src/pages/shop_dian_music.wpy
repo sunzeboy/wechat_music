@@ -1,0 +1,180 @@
+<style lang="less">
+    .section{
+        text-align: center;
+    }
+    .selected{
+      background-color:green !important;
+    }
+    .normal{
+      background-color:gray !important;
+    }
+    .sms-checkbox{
+      padding-left:15px;
+      padding-bottom: 10px;
+    }
+</style>
+
+<template>
+    <van-datetime-picker
+      type="date"
+      value="{{ currentDate }}"
+      bind:input="onInput"
+      min-date="{{ minDate }}"
+    />
+    <van-cell title="可选时段" class="section">
+    </van-cell>
+    
+    <block wx:for-items="{{sections}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+        <van-cell class="section" custom-class="{{index%2 == 0 ? 'selected':'normal'}}" title="{{item}}" size="large" >
+          <van-icon wx:if="{{index%2 == 0}}" slot="right-icon" name="{{'music-o'}}" style="margin-left:25px;" class="custom-icon" color="#13227a" size="20px" @tap="dianMusic"/>
+        </van-cell>
+    </block>
+    <van-dialog
+    title="点歌"
+    use-slot
+    show="{{ isDialogShow }}"
+    show-cancel-button
+    bind:close="onDialogClose"
+    bind:confirm="addPlayList"
+    async-close=true
+    >
+    <van-cell-group>
+      <van-field
+        value="{{ selectedMusicName }}"
+        center
+        clearable
+        label="歌曲"
+        placeholder="请选择歌曲"
+        border="{{ false }}"
+        use-button-slot
+      >
+        <van-button slot="button" size="small" type="primary" @tap="selectMusic">选择歌曲</van-button>
+      </van-field>
+      <van-field
+        value="{{ phone }}"
+        label="手机号"
+        placeholder="请输入手机号"
+        error-message="{{errorMessagePhone}}"
+        border="{{ false }}"
+      />
+      <van-checkbox value="{{ isNeedSMS }}" custom-class="sms-checkbox" bind:change="onSMSChange">短信通知</van-checkbox>
+      <p style="color: red;">点播歌曲需要花费10点积分</p>
+    </van-cell-group>
+    <van-toast id="van-toast" />
+    </van-dialog>
+    <van-action-sheet
+      show="{{ actionSheetShow }}"
+      actions="{{ actionSheetDatas }}"
+      cancel-text="取消"
+      bind:select="onActionSheetSelect"
+      z-index=100000
+      close-on-click-overlay=true
+    />
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import * as api from '../api/api.js'
+  import Toast from '../styles/vant/toast/toast';
+
+
+  export default class Shop_Dian_Music extends wepy.page {
+    config = {
+      navigationBarTitleText: '店铺点歌',
+      component: true,
+      usingComponents: {
+        'van-cell': '/styles/vant/cell/index',
+        'van-cell-group': '/styles/vant/cell-group/index',
+        'van-button': '/styles/vant/button/index',
+        'van-icon': '/styles/vant/icon/index',
+        'van-field': '/styles/vant/field/index',
+        'van-swipe-cell': '/styles/vant/swipe-cell/index',
+        "van-toast": "/styles/vant/toast/index",
+        "van-datetime-picker": "/styles/vant/datetime-picker/index",
+        'van-dialog': '/styles/vant/dialog/index',
+        'van-checkbox': '/styles/vant/checkbox/index',
+        "van-action-sheet": "/styles/vant/action-sheet/index"
+      }
+    }
+    components = {
+      
+    }
+
+
+    data = {
+      currentDate: new Date().getTime(),
+      minDate: new Date().getTime(),
+      sections:["12:00","13:00","14:00","15:00","16:00"],
+      checked: true,
+      isNeedSMS: false,
+      isDialogShow: false,
+      selectedMusicName:'',
+      actionSheetShow: false,
+      errorMessagePhone:'',
+      actionSheetDatas: [
+        {
+          name: '歌曲1',
+          subname: '歌手：111',
+        },
+        {
+          name: '歌曲2',
+          subname: '歌手：222',
+        },
+        {
+          name: '歌曲3',
+          subname: '歌手：333',
+        },
+        {
+          name: '歌曲4',
+          subname: '歌手：444',
+        }
+      ]
+      // formatter(type, value) {
+      //   if (type === 'year') {
+      //     return `${value}年`;
+      //   } else if (type === 'month') {
+      //     return `${value}月`;
+      //   }
+      //   return value;
+      // }
+    }
+
+    computed = {
+      
+    }
+
+    methods = {
+      dianMusic() {
+        this.isDialogShow = true
+      },
+      onDialogClose() {
+        this.isDialogShow = false
+      },
+      selectMusic(){
+        this.actionSheetShow = true
+      },
+      onActionSheetClose(){
+
+      },
+      onActionSheetSelect(event){
+        this.selectedMusicName = event.detail.name
+        this.actionSheetShow = false
+      },
+      onSMSChange(event){
+        this.isNeedSMS = event.detail
+      }
+    }
+
+    events = {
+      'index-emit': (...args) => {
+        let $event = args[args.length - 1]
+        console.log(`${this.$name} receive ${$event.name} from ${$event.source.$name}`)
+      }
+    }
+
+    onLoad() {
+      
+      
+    }
+  }
+</script>

@@ -24,12 +24,15 @@ export default class extends wepy.app {
     ],
     pages: [
       // 'pages/bind',
+      // 'pages/shop_dian_music',
       'pages/music_list',
       'pages/my_music_list',
       'pages/setting',
       'pages/webview',
       'pages/shop_home',
-      'pages/music_shop'
+      'pages/music_shop',
+      'pages/dian_music_list',
+      'pages/shop_dian_music'
     ],
     window: {
       backgroundTextStyle: 'light',

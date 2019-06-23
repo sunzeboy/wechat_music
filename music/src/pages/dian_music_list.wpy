@@ -1,0 +1,90 @@
+<style lang="less">
+    
+</style>
+
+<template>
+    <view>
+        <block wx:for-items="{{playlists}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+            <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}"  async-close bind:close="onCellClose(1,{{item}})">
+                <van-cell title="{{/*index+1 + '.' +*/ item.title}}"  value="{{item.cnt}}" label="点歌时间：{{item.comment}}" class="section">
+                    <van-icon slot="icon" name="http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_img&sid={{item.sid}}" style="margin-right:15px;" class="custom-icon"  size="40px"/>
+                </van-cell>
+                <view slot="right" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #f44;" >删除</view>
+            </van-swipe-cell>
+        </block>
+
+        <van-button size="large" @tap="add" >+点歌</van-button>
+    </view>
+    
+
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import * as api from '../api/api.js'
+  import Toast from '../styles/vant/toast/toast';
+
+
+  export default class Dian_Music_List extends wepy.page {
+    config = {
+      navigationBarTitleText: '我的点歌',
+      component: true,
+      usingComponents: {
+        'van-cell': '/styles/vant/cell/index',
+        'van-cell-group': '/styles/vant/cell-group/index',
+        'van-button': '/styles/vant/button/index',
+        'van-icon': '/styles/vant/icon/index',
+        'van-field': '/styles/vant/field/index',
+        'van-swipe-cell': '/styles/vant/swipe-cell/index',
+        "van-toast": "/styles/vant/toast/index"
+      }
+    }
+    components = {
+      
+    }
+
+
+    data = {
+      playlists:[
+        {
+            'title':'龙之梦公园店',
+            'cnt':'已预约',
+            'comment':'2019-12-12 12:20:32',
+            'sid':'21'
+        },
+        {
+            'title':'中山公园店',
+            'cnt':'审核中',
+            'comment':'2019-12-12 12:20:32',
+            'sid':'22'
+        }
+      ],
+      code:'',
+      openid:''
+    }
+
+    computed = {
+      
+    }
+
+    methods = {
+      add() {
+        wepy.navigateTo({
+          url: '/pages/shop_dian_music'
+        })
+      }
+    }
+
+    events = {
+      'index-emit': (...args) => {
+        let $event = args[args.length - 1]
+        console.log(`${this.$name} receive ${$event.name} from ${$event.source.$name}`)
+      }
+    }
+
+    onLoad() {
+      
+      
+    }
+  }
+</script>
