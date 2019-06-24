@@ -82,6 +82,7 @@ export default class extends wepy.app {
     screenWidth:0,
     businessData:{},
     userInfo: null,
+    current_shopsid:'',
     custom_play () {
       this.custom_uploadLog()
       this.backgroundAudioManager.title = this.custom_selectedName()
@@ -339,7 +340,7 @@ export default class extends wepy.app {
   fetchData(options) {
     let self = this
     let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=index&unionid=aaaaaa&openid=bbbbbb'
-    // let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=index&unionid=aaaaaa&openid=bbbbbb'+options.openid
+    // let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=index&unionid=aaaaaa&openid='+options.openid
     wepy.request({  
         url: url,  
         data: {},  

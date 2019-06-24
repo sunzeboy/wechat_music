@@ -45,20 +45,7 @@
 
 
     data = {
-      playlists:[
-        {
-            'title':'龙之梦公园店',
-            'cnt':'已预约',
-            'comment':'2019-12-12 12:20:32',
-            'sid':'21'
-        },
-        {
-            'title':'中山公园店',
-            'cnt':'审核中',
-            'comment':'2019-12-12 12:20:32',
-            'sid':'22'
-        }
-      ],
+      playlists:[],
       code:'',
       openid:''
     }
@@ -74,7 +61,20 @@
         })
       }
     }
-
+    custom_refresh_orderplay(){
+      let self = this;
+      let url =
+        'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_orderplay_userlist'
+      wepy.request({
+        url: url,
+        data: {},
+        method: 'GET',
+        success: function(res) {
+          self.playlists = res.data.items;
+          self.$apply();
+        }
+      });
+    }
     events = {
       'index-emit': (...args) => {
         let $event = args[args.length - 1]
@@ -84,7 +84,10 @@
 
     onLoad() {
       
-      
+    }
+
+    onShow(){
+      this.custom_refresh_orderplay()
     }
   }
 </script>

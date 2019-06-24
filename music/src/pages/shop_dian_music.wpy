@@ -18,15 +18,15 @@
     <van-datetime-picker
       type="date"
       value="{{ currentDate }}"
-      bind:input="onInput"
+      bind:input="onSelectDate"
       min-date="{{ minDate }}"
     />
     <van-cell title="可选时段" class="section">
     </van-cell>
     
-    <block wx:for-items="{{sections}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-        <van-cell class="section" custom-class="{{index%2 == 0 ? 'selected':'normal'}}" title="{{item}}" size="large" >
-          <van-icon wx:if="{{index%2 == 0}}" slot="right-icon" name="{{'music-o'}}" style="margin-left:25px;" class="custom-icon" color="#13227a" size="20px" @tap="dianMusic"/>
+    <block wx:for-items="{{times}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+        <van-cell class="section" custom-class="{{item.isfree ? 'selected':'normal'}}" title="{{item.timedesc}}" size="large" >
+          <van-icon wx:if="{{item.isfree}}" slot="right-icon" name="{{'music-o'}}" style="margin-left:25px;" class="custom-icon" color="#13227a" size="20px" @tap="dianMusic({{item}})"/>
         </van-cell>
     </block>
     <van-dialog
@@ -35,7 +35,7 @@
     show="{{ isDialogShow }}"
     show-cancel-button
     bind:close="onDialogClose"
-    bind:confirm="addPlayList"
+    bind:confirm="addOrderPlayList"
     async-close=true
     >
     <van-cell-group>
@@ -56,6 +56,7 @@
         placeholder="请输入手机号"
         error-message="{{errorMessagePhone}}"
         border="{{ false }}"
+        bind:change="typePhone"
       />
       <van-checkbox value="{{ isNeedSMS }}" custom-class="sms-checkbox" bind:change="onSMSChange">短信通知</van-checkbox>
       <p style="color: red;">点播歌曲需要花费10点积分</p>
@@ -69,6 +70,7 @@
       bind:select="onActionSheetSelect"
       z-index=100000
       close-on-click-overlay=true
+      bind:cancel="onCancelActionSheet"
     />
 </template>
 
@@ -104,13 +106,16 @@
     data = {
       currentDate: new Date().getTime(),
       minDate: new Date().getTime(),
-      sections:["12:00","13:00","14:00","15:00","16:00"],
+      times:["12:00","13:00","14:00","15:00","16:00"],
       checked: true,
       isNeedSMS: false,
       isDialogShow: false,
       selectedMusicName:'',
       actionSheetShow: false,
       errorMessagePhone:'',
+      filesid:'',
+      daytick:'',
+      phone:'',
       actionSheetDatas: [
         {
           name: '歌曲1',
@@ -128,7 +133,8 @@
           name: '歌曲4',
           subname: '歌手：444',
         }
-      ]
+      ],
+      
       // formatter(type, value) {
       //   if (type === 'year') {
       //     return `${value}年`;
@@ -144,7 +150,9 @@
     }
 
     methods = {
-      dianMusic() {
+      dianMusic(item) {
+        console.log(item);
+        this.daytick = item.daytick
         this.isDialogShow = true
       },
       onDialogClose() {
@@ -157,21 +165,101 @@
 
       },
       onActionSheetSelect(event){
+        console.log(event);
+        this.filesid = event.detail.filesid
         this.selectedMusicName = event.detail.name
+        this.actionSheetShow = false
+      },
+      onCancelActionSheet(){
         this.actionSheetShow = false
       },
       onSMSChange(event){
         this.isNeedSMS = event.detail
+      },
+      onSelectDate(event){
+        this.currentDate = event.detail
+        this.custom_orderplay_gettimes()
+      },
+      addOrderPlayList(){
+        this.custom_orderplay()
+      },
+      typePhone(event){
+        this.phone = event.detail.value
       }
     }
-
+    custom_secondToDate(result) {
+        var h = Math.floor(result / 3600) < 10 ? '0'+Math.floor(result / 3600) : Math.floor(result / 3600);
+        var m = Math.floor((result / 60 % 60)) < 10 ? '0' + Math.floor((result / 60 % 60)) : Math.floor((result / 60 % 60));
+        var s = Math.floor((result % 60)) < 10 ? '0' + Math.floor((result % 60)) : Math.floor((result % 60));
+        return result = h + ":" + m + ":" + s;
+    }
+    custom_orderplay_gettimes(){
+      let self = this;
+      let url =
+        'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_orderplay_ticks&sid=449'/*+this.$parent.globalData.current_shopsid*/+'&daytime='+ this.currentDate
+      wepy.request({
+        url: url,
+        data: {},
+        method: 'GET',
+        success: function(res) {
+          self.times = res.data.items;
+          self.times.forEach(item => {
+            item.timedesc = self.custom_secondToDate(item.daytick)
+          });
+          self.$apply();
+        }
+      });
+    }
+    custom_orderplay_getmusics(){
+      let self = this;
+      let url =
+        'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_orderplay_filelist&p=json'
+      wepy.request({
+        url: url,
+        data: {},
+        method: 'GET',
+        success: function(res) {
+          self.actionSheetDatas = res.data.items;
+          self.actionSheetDatas.forEach(element => {
+            element.name = element.title
+            element.subname = '歌手：'+element.artist
+          });
+          self.$apply();
+        }
+      });
+    }
+    custom_orderplay(){
+      let self = this;
+      let url =
+        'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_orderplay_add&p=json'
+      wepy.request({
+        url: url,
+        data: {
+          'shopsid':this.$parent.globalData.current_shopsid,
+          'membersid':this.$parent.globalData.businessData.userInfo.sid,
+          'filesid':this.filesid,
+          'daytime':this.currentDate,
+          'daytick':this.daytick,
+          'notify':this.isNeedSMS,
+          'notifytime':'',
+          'mobi':this.phone
+        },
+        method: 'POST',
+        success: function(res) {
+          self.actionSheetDatas = res.data.items;
+          self.$apply();
+        }
+      });
+    }
     events = {
       'index-emit': (...args) => {
         let $event = args[args.length - 1]
         console.log(`${this.$name} receive ${$event.name} from ${$event.source.$name}`)
       }
     }
-
+    onShow() {
+      this.custom_orderplay_getmusics()
+    }
     onLoad() {
       
       

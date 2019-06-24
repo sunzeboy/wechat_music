@@ -63,6 +63,7 @@
     computed = {
       shops(){
         var array = this.$parent.globalData.businessData.shops
+        if (array == undefined) return;
         array.forEach(element => {
           // element.timeDesc = utils.timeDesc(element.lasthit)
           element.timeDesc = utils.timeDesc()
@@ -75,14 +76,13 @@
 
     methods = {
       jumpToWebView (item) {
+        this.$parent.globalData.current_shopsid = item.sid
         wepy.navigateTo({
           url: '/pages/shop_home?shopsid='+item.sid
         })
       }
     }
     custom_lastTime(index){
-      console.log(index);
-      console.log(this.$parent.globalData.businessData.shops)
       return '上次逛店时间：'+ utils.timeDesc(this.$parent.globalData.businessData.shops[index].lasthit)
     }
     events = {
