@@ -41,10 +41,10 @@ export default class extends wepy.app {
       navigationBarTextStyle: 'black'
     },
     tabBar: {
-      color: "#7A7E83",
-      selectedColor: "#13227a",
+      color: "#ffffff",
+      selectedColor: "#FB5A26",
       borderStyle: "black",
-      backgroundColor: "#ffffff",
+      backgroundColor: "#000000",
       list: [{
         pagePath: "pages/music_list",
         iconPath: "resource/list.png",
@@ -70,6 +70,7 @@ export default class extends wepy.app {
   }
 
   globalData = {
+    sessionid:'',
     sel_sec:0,
     sel_row:0,
     selectedIndex:0,
@@ -296,9 +297,11 @@ export default class extends wepy.app {
 
   onLaunch(options) {
     // this.testAsync()
-    wepy.setStorageSync('sid', options.query.sid);//存储openid  
+    // wepy.setStorageSync('shopsid', options.query.shopsid);//存储openid  
+    wepy.setStorageSync('shopsid', 1255);//存储openid  
+
     // this.getUserInfo()
-    this.login()
+    // this.login()
     this.globalData.play()
     let self = this
     wepy.getSystemInfo({
@@ -311,23 +314,28 @@ export default class extends wepy.app {
   
   login() {
     let self = this
-    wepy.login({
+    wx.login({
       success (res) {
-        if (res.code) 
-        {
+        if (res.code) {
           //发起网络请求
           wx.request({
-            url: 'https://api.weixin.qq.com/sns/jscode2session?appid=wxb59da13859d938d4&secret=633a602a78cd9ec0ffa3cddd3de08450&js_code='+ res.code +'&grant_type=authorization_code',
-            data: {},
-            header: {
-                'content-type': 'application/json'
+            url: 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_applogin',
+            data: {
+              code: res.code
             },
-            success: function(res) {
-              console.log(res);
-              // openid = res.data.openid //返回openid
-              var op = {}
-              op.openid = res.data.openid
-              self.fetchData(op)
+            success:function (res) {
+              console.log(res.data.sessionid);
+              wepy.setStorageSync('sessionid',res.data.sessionid)
+              self.fetchData()
+              let shopsid = wepy.getStorageSync('shopsid')
+              if (shopsid == undefined) 
+              {
+                
+              }
+              else
+              {
+                self.kickshop(shopsid)
+              }
             }
           })
         } else {
@@ -337,33 +345,56 @@ export default class extends wepy.app {
     })
   }
 
-  fetchData(options) {
+  kickshop(shopsid){
     let self = this
-    let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=index&unionid=aaaaaa&openid=bbbbbb'
+    let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_kickshop&shopsid='+shopsid
     // let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=index&unionid=aaaaaa&openid='+options.openid
     wepy.request({  
         url: url,  
+        header: {
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+        },
+        data: {},  
+        method: 'POST',   
+        success: function(res){ 
+          console.log(res);
+          // self.globalData.businessData = res.data
+        }  
+    });
+  }
+
+  fetchData(options) {
+    let self = this
+    let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=index&p=json'
+    // let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=index&unionid=aaaaaa&openid='+options.openid
+    wepy.request({  
+        url: url,  
+        header: {
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+        },
         data: {},  
         method: 'GET',   
         success: function(res){ 
+          console.log('++++++++fetchData++');
+          
           console.log(res);
           self.globalData.businessData = res.data
         }  
     });
   }
 
-  sleep (s) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve('promise resolved')
-      }, s * 1000)
-    })
-  }
+  // sleep (s) {
+  //   return new Promise((resolve, reject) => {
+  //     setTimeout(() => {
+  //       resolve('promise resolved')
+  //     }, s * 1000)
+  //   })
+  // }
 
-  async testAsync () {
-    const data = await this.sleep(3)
-    console.log(data)
-  }
+  // async testAsync () {
+  //   const data = await this.sleep(3)
+  //   console.log(data)
+  // }
 
   getUserInfo(cb) {
     const that = this

@@ -20,7 +20,7 @@
 </style>
 
 <template>
-    <van-tabs color="#13227a" swipeable=true>
+    <van-tabs color="#FB5A26" swipeable=true>
         <van-tab title="我的歌单">
             <view style="width: 100%;height: {{screenHeight}}rpx;background-color: #fff;">
                 <!-- <van-collapse value="{{ activeNames }}" bind:change="onChange" accordion>
@@ -38,10 +38,10 @@
                 </van-collapse> -->
                 <block wx:for-items="{{playlists}}" wx:for-index="index" wx:key="index" wx:for-item="item">
                     <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}"  async-close bind:close="onCellClose(1,{{item}})">
-                        <van-cell title="{{/*index+1 + '.' +*/ item.title}}"  value="{{item.cnt}}首" label="备注：{{item.comment}}" class="section">
+                        <van-cell title="{{item.title}}"  value="{{item.cnt}}首" label="备注：{{item.comment}}" class="section">
                             <van-icon slot="icon" name="http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_img&sid={{item.sid}}" style="margin-right:15px;" class="custom-icon"  size="40px"/>
-                            <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#13227a" size="20px" style="margin-left:15px;" @tap="playAndAddToPlayList({{item.sid}})"/>
-                            <van-icon slot="right-icon" name="edit" class="custom-icon" color="#13227a" size="20px" style="margin-left:25px;" @tap="edit({{item}})"/>
+                            <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#FB5A26" size="20px" style="margin-left:15px;" @tap="playAndAddToPlayList({{item.sid}})"/>
+                            <van-icon slot="right-icon" name="edit" class="custom-icon" color="#FB5A26" size="20px" style="margin-left:25px;" @tap="edit({{item}})"/>
                         </van-cell>
                         <view slot="right" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #f44;" >删除</view>
                     </van-swipe-cell>
@@ -59,7 +59,7 @@
                             <van-checkbox
                             style="display: inline-block;"
                             value="{{ item.isSelected }}"
-                            checked-color="#13227a"
+                            checked-color="#FB5A26"
                             @tap.stop="selectSingle({{index}})"
                             >
                             </van-checkbox>
@@ -82,14 +82,14 @@
                             <van-checkbox
                             style="display: inline-block;width: 33%;height: 100%;"
                             value="{{ allSelect }}"
-                            checked-color="#13227a"
+                            checked-color="#FB5A26"
                             @change="selectAll"
                             >
                             {{allSelect == true ? "反全选":"全选"}}
                             </van-checkbox>
                         </van-col>
                         <van-col span="8">
-                            <view style="display: inline-block;height: 100%;line-height: 40px;width: 33%;color: #13227a;" @tap="addToMyMusicList">
+                            <view style="display: inline-block;height: 100%;line-height: 40px;width: 33%;color: #FB5A26;" @tap="addToMyMusicList">
                                 添加到歌单
                             </view>
                         </van-col>
@@ -154,7 +154,7 @@
         data-name="{{item.sid}}"
         bind:click="toggle({{item.sid}})"
         >
-        <van-radio name="{{item.sid}}" checked-color="#13227a"/>
+        <van-radio name="{{item.sid}}" checked-color="#FB5A26"/>
         </van-cell>
     </van-cell-group>
     </van-radio-group>
@@ -231,7 +231,10 @@ export default class MyMusic_list extends wepy.page {
       });
       let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_item&p=json'
       wepy.request({  
-          url: url,  
+          url: url, 
+          header: {
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+          }, 
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
             "sid":this.result,
@@ -296,7 +299,10 @@ export default class MyMusic_list extends wepy.page {
       let self = this;
       let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan&p=json'
       wepy.request({  
-          url: url,  
+          url: url, 
+          header: {
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+          }, 
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
             "sid":'',
@@ -421,7 +427,10 @@ export default class MyMusic_list extends wepy.page {
       });
       let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_itemlist&p=json'
       wepy.request({  
-          url: url,  
+          url: url, 
+          header: {
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+          }, 
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
             "playlistsid":sid
@@ -463,7 +472,10 @@ export default class MyMusic_list extends wepy.page {
     var self = this
     let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_fav&p=json'
     wepy.request({  
-        url: url,  
+        url: url, 
+        header: {
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+        }, 
         data: {
           "usersid":this.$parent.globalData.businessData.userInfo.sid,
           "filesid":item.filesid,
@@ -489,6 +501,9 @@ export default class MyMusic_list extends wepy.page {
     let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan&p=json'
     wepy.request({  
         url: url,  
+        header: {
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+        },
         data: {
           "usersid":this.$parent.globalData.businessData.userInfo.sid,
           "sid":item.sid,
@@ -525,6 +540,9 @@ export default class MyMusic_list extends wepy.page {
       'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedanlist&usersid=' + this.$parent.globalData.businessData.userInfo.sid
     wepy.request({
       url: url,
+      header: {
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+      },
       data: {},
       method: 'GET',
       success: function(res) {
@@ -540,6 +558,9 @@ export default class MyMusic_list extends wepy.page {
       'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_favlist&usersid=' + this.$parent.globalData.businessData.userInfo.sid
     wepy.request({
       url: url,
+      header: {
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+      },
       data: {},
       method: 'GET',
       success: function(res) {

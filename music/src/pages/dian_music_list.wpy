@@ -1,13 +1,27 @@
 <style lang="less">
-    
+    .van-cell-text{
+      width: 250px;
+    }
 </style>
 
 <template>
     <view>
         <block wx:for-items="{{playlists}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-            <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}"  async-close bind:close="onCellClose(1,{{item}})">
-                <van-cell title="{{/*index+1 + '.' +*/ item.title}}"  value="{{item.cnt}}" label="点歌时间：{{item.comment}}" class="section">
-                    <van-icon slot="icon" name="http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_img&sid={{item.sid}}" style="margin-right:15px;" class="custom-icon"  size="40px"/>
+            <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}"  async-close bind:close="onCellClose({{item}})">
+                <van-cell  value="{{item.statusDesc}}"  class="section">
+                  <view slot="title">
+                    <view class="van-cell-text">{{'店铺名称：' + item.shop_name}}</view>
+                    <view class="van-cell-text">{{'歌曲：'+item.file_title}}</view>
+                    <view class="van-cell-text">{{'点歌时间：'+item.time}}</view>
+                    <view class="van-cell-text">{{'通知手机号：'+item.mobi}}</view>
+                    <view class="van-cell-text">{{'通知时间：'+item.notifytimeDesc}}</view>
+                  </view>
+                  <!-- <view slot="label">
+                    <view class="van-cell-text">{{'点歌时间：'+item.time}}</view>
+                    <view class="van-cell-text">{{'通知手机号：'+item.mobi}}</view>
+                    <view class="van-cell-text">{{'通知时间：'+item.notifytime}}</view>
+                  </view> -->
+                    <!-- <van-icon slot="icon" name="http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_img&sid={{item.sid}}" style="margin-right:15px;" class="custom-icon"  size="40px"/> -->
                 </van-cell>
                 <view slot="right" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #f44;" >删除</view>
             </van-swipe-cell>
@@ -16,6 +30,7 @@
         <van-button size="large" @tap="add" >+点歌</van-button>
     </view>
     
+      <van-dialog id="van-dialog" />
 
 </template>
 
@@ -23,6 +38,7 @@
   import wepy from 'wepy'
   import * as api from '../api/api.js'
   import Toast from '../styles/vant/toast/toast';
+  import Dialog from '../styles/vant/dialog/dialog';
 
 
   export default class Dian_Music_List extends wepy.page {
@@ -36,6 +52,7 @@
         'van-icon': '/styles/vant/icon/index',
         'van-field': '/styles/vant/field/index',
         'van-swipe-cell': '/styles/vant/swipe-cell/index',
+        'van-dialog': '/styles/vant/dialog/index',
         "van-toast": "/styles/vant/toast/index"
       }
     }
@@ -59,7 +76,29 @@
         wepy.navigateTo({
           url: '/pages/shop_dian_music'
         })
-      }
+      },
+      onCellClose(item,event) {
+        let self = this;
+        console.log(item);
+        const { position, instance } = event.detail;
+        switch (position) {
+          case 'left':
+          case 'cell':
+            var swipeCell = self.$wxpage.selectAllComponents('#swipe-cell');
+            swipeCell.forEach(element => {
+              element.close();
+            });
+            self.allSelect = false;
+            break;
+          case 'right':
+            Dialog.confirm({
+            message: '确定删除吗？'
+            }).then(() => {
+              self.custom_del_playlist(instance,item)
+            });
+            break;
+        }
+      },
     }
     custom_refresh_orderplay(){
       let self = this;
@@ -67,14 +106,66 @@
         'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_orderplay_userlist'
       wepy.request({
         url: url,
+        header: {
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+        },
         data: {},
         method: 'GET',
         success: function(res) {
           self.playlists = res.data.items;
+          self.playlists.forEach(element => {
+            let time = parseInt(element.daytime) + parseInt(element.daytick)
+            element.time = new Date(time*1000 + 8 * 3600 * 1000).toJSON().substr(0, 19).replace('T', ' ').replace(/-/g, '-');
+            console.log(element.notifytime);
+            
+            element.notifytimeDesc = new Date(parseInt(element.notifytime)*1000 + 8 * 3600 * 1000).toJSON().substr(0, 19).replace('T', ' ').replace(/-/g, '-');
+            if (element.status == '0') 
+            {
+              element.statusDesc = '已取消'
+            } 
+            else if (element.status == '1')
+            {
+              element.statusDesc = '申请中'
+            }
+            else if (element.status == '2')
+            {
+              element.statusDesc = '申请通过'
+            }
+            else if (element.status == '3')
+            {
+              element.statusDesc = '已驳回'
+            }
+          });
           self.$apply();
         }
       });
     }
+    custom_del_playlist(instance,item){
+      var self = this
+      let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_orderplay_cancel&sid='+item.sid
+      wepy.request({  
+          url: url,  
+          header: {
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+          },
+          data: {
+          },  
+          method: 'POST',   
+          success: function(res){ 
+              if (res.data.status == 1) 
+              {
+                Toast('删除点歌成功！');
+              } 
+              else 
+              {
+                Toast('删除点歌失败！');
+              }
+              instance.close();
+              self.custom_refresh_orderplay()
+          }  
+      });
+    }
+    
     events = {
       'index-emit': (...args) => {
         let $event = args[args.length - 1]

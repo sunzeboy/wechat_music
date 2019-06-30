@@ -15,18 +15,12 @@
 </style>
 
 <template>
-    <van-datetime-picker
-      type="date"
-      value="{{ currentDate }}"
-      bind:input="onSelectDate"
-      min-date="{{ minDate }}"
-    />
-    <van-cell title="可选时段" class="section">
-    </van-cell>
-    
+    <van-cell-group>
+      <van-cell title="请选择日期" bind:click="onDatePickerFocus" value="{{ topDateDesc }}" />
+    </van-cell-group>
     <block wx:for-items="{{times}}" wx:for-index="index" wx:key="index" wx:for-item="item">
         <van-cell class="section" custom-class="{{item.isfree ? 'selected':'normal'}}" title="{{item.timedesc}}" size="large" >
-          <van-icon wx:if="{{item.isfree}}" slot="right-icon" name="{{'music-o'}}" style="margin-left:25px;" class="custom-icon" color="#13227a" size="20px" @tap="dianMusic({{item}})"/>
+          <van-icon wx:if="{{item.isfree}}" slot="right-icon" name="{{'music-o'}}" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap="dianMusic({{item}})"/>
         </van-cell>
     </block>
     <van-dialog
@@ -59,9 +53,19 @@
         bind:change="typePhone"
       />
       <van-checkbox value="{{ isNeedSMS }}" custom-class="sms-checkbox" bind:change="onSMSChange">短信通知</van-checkbox>
+      <!-- <van-field
+        value="{{ notifyTimeDesc }}"
+        label="通知时间"
+        placeholder="请选择通知时间"
+        error-message="{{errorMessagePhone}}"
+        border="{{ false }}"
+        bind:focus="typeNotifyTime"
+      /> -->
+      <!-- <van-cell-group> -->
+        <van-cell title="请选择通知时间" bind:click="typeNotifyTime" value="{{ notifyTimeDesc }}" />
+      <!-- </van-cell-group> -->
       <p style="color: red;">点播歌曲需要花费10点积分</p>
     </van-cell-group>
-    <van-toast id="van-toast" />
     </van-dialog>
     <van-action-sheet
       show="{{ actionSheetShow }}"
@@ -72,6 +76,42 @@
       close-on-click-overlay=true
       bind:cancel="onCancelActionSheet"
     />
+    <van-popup
+      show="{{ isTimePickerShow1 }}"
+      position="bottom"
+      overlay="{{ false }}"
+      bind:close="onClose"
+    >
+    <van-cell title="可选时段" class="section">
+    </van-cell>
+    <van-datetime-picker
+      type="date"
+      value="{{ currentDate }}"
+      bind:input="onSelectDate"
+      bind:cancel="onClose"
+      bind:confirm="onClose"
+      min-date="{{ minDate1 }}"
+    />
+    </van-popup>
+    <van-popup
+      show="{{ isTimePickerShow2 }}"
+      position="bottom"
+      overlay="{{ false }}"
+      z-index=100001
+      bind:close="onClose"
+    >
+    <van-cell title="可选时段" class="section">
+    </van-cell>
+    <van-datetime-picker
+      type="datetime"
+      value="{{ currentDate2 }}"
+      bind:cancel="onClose"
+      bind:confirm="onClose"
+      bind:input="onSelectDate2"
+      min-date="{{ minDate2 }}"
+    />
+    </van-popup>
+    <van-toast id="van-toast" />
 </template>
 
 <script>
@@ -95,6 +135,7 @@
         "van-datetime-picker": "/styles/vant/datetime-picker/index",
         'van-dialog': '/styles/vant/dialog/index',
         'van-checkbox': '/styles/vant/checkbox/index',
+        "van-popup": "/styles/vant/popup/index",
         "van-action-sheet": "/styles/vant/action-sheet/index"
       }
     }
@@ -104,8 +145,12 @@
 
 
     data = {
+      isTimePickerShow1:false,
+      isTimePickerShow2:false,
       currentDate: new Date().getTime(),
-      minDate: new Date().getTime(),
+      currentDate2: new Date().getTime(),
+      minDate1: new Date().getTime()+7*24*3600*1000,
+      minDate2: new Date().getTime(),
       times:["12:00","13:00","14:00","15:00","16:00"],
       checked: true,
       isNeedSMS: false,
@@ -135,21 +180,53 @@
         }
       ],
       
-      // formatter(type, value) {
-      //   if (type === 'year') {
-      //     return `${value}年`;
-      //   } else if (type === 'month') {
-      //     return `${value}月`;
-      //   }
-      //   return value;
-      // }
     }
 
     computed = {
-      
+      topDateDesc () {
+        return this.dateFormat(this.currentDate)
+      },
+      notifyTimeDesc () {
+        return this.dateTimeFormat(this.currentDate2)
+      }
+    }
+    dateFormat(timestamp){
+      var time = new Date(timestamp)    //先将时间戳转为Date对象，然后才能使用Date的方法
+      var year = time.getFullYear(),
+          month = time.getMonth() + 1 ,  //月份是从0开始的
+          day = time.getDate(),
+          hour = time.getHours(),
+          minute = time.getMinutes(),
+          second = time.getSeconds()
+          //add0()方法在后面定义
+      return  year+'-'+this.add0(month)+'-'+ this.add0(day);
+    }
+    dateTimeFormat(timestamp){
+      var time = new Date(timestamp)    //先将时间戳转为Date对象，然后才能使用Date的方法
+      var year = time.getFullYear(),
+          month = time.getMonth() + 1 ,  //月份是从0开始的
+          day = time.getDate(),
+          hour = time.getHours(),
+          minute = time.getMinutes(),
+          second = time.getSeconds()
+          //add0()方法在后面定义
+      return  year+'-'+this.add0(month)+'-'+ this.add0(day)+' '+this.add0(hour)+':'+this.add0(minute)+':'+this.add0(second) ;
+    }
+    add0(m){
+      return m < 10 ? '0' + m: m
     }
 
     methods = {
+      onClose(){
+        this.isTimePickerShow1 = false
+        this.isTimePickerShow2 = false
+      },
+      onDatePickerFocus () {
+        this.isTimePickerShow1 = true
+      },
+      typeNotifyTime (){
+        this.isTimePickerShow2 = true
+      },
       dianMusic(item) {
         console.log(item);
         this.daytick = item.daytick
@@ -166,7 +243,7 @@
       },
       onActionSheetSelect(event){
         console.log(event);
-        this.filesid = event.detail.filesid
+        this.filesid = event.detail.sid
         this.selectedMusicName = event.detail.name
         this.actionSheetShow = false
       },
@@ -180,11 +257,14 @@
         this.currentDate = event.detail
         this.custom_orderplay_gettimes()
       },
+      onSelectDate2(event){
+        this.currentDate2 = event.detail
+      },
       addOrderPlayList(){
         this.custom_orderplay()
       },
       typePhone(event){
-        this.phone = event.detail.value
+        this.phone = event.detail
       }
     }
     custom_secondToDate(result) {
@@ -196,9 +276,12 @@
     custom_orderplay_gettimes(){
       let self = this;
       let url =
-        'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_orderplay_ticks&sid=449'/*+this.$parent.globalData.current_shopsid*/+'&daytime='+ this.currentDate
+        'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_orderplay_ticks&sid=449'/*+this.$parent.globalData.current_shopsid*/+'&daytime='+ (new Date(new Date(this.currentDate).toLocaleDateString()).getTime())/1000
       wepy.request({
         url: url,
+        header: {
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+        },
         data: {},
         method: 'GET',
         success: function(res) {
@@ -216,6 +299,9 @@
         'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_orderplay_filelist&p=json'
       wepy.request({
         url: url,
+        header: {
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+        },
         data: {},
         method: 'GET',
         success: function(res) {
@@ -229,25 +315,41 @@
       });
     }
     custom_orderplay(){
+      if (this.filesid == '') 
+      {
+        Toast('请选择歌曲！')
+        return;
+      }
+      if (this.phone.length != 11) 
+      {
+        // this.errorMessagePhone = '手机号不合法'
+        Toast('手机号不合法!')
+        return;
+      }
+
       let self = this;
       let url =
         'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_orderplay_add&p=json'
       wepy.request({
         url: url,
+        header: {
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+        },
         data: {
           'shopsid':this.$parent.globalData.current_shopsid,
           'membersid':this.$parent.globalData.businessData.userInfo.sid,
           'filesid':this.filesid,
-          'daytime':this.currentDate,
+          'daytime':(new Date(new Date(this.currentDate).toLocaleDateString()).getTime())/1000,
           'daytick':this.daytick,
           'notify':this.isNeedSMS,
-          'notifytime':'',
+          'notifytime':this.currentDate2/1000,
           'mobi':this.phone
         },
         method: 'POST',
         success: function(res) {
-          self.actionSheetDatas = res.data.items;
-          self.$apply();
+          wepy.navigateBack({
+            delta:1
+          })
         }
       });
     }
@@ -261,7 +363,6 @@
       this.custom_orderplay_getmusics()
     }
     onLoad() {
-      
       
     }
   }

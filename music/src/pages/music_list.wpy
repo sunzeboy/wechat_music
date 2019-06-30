@@ -38,7 +38,7 @@
     box-sizing: border-box;
     text-align: center;
     overflow: hidden;
-    background: rgba(70, 29, 29, 0.18);
+    background: rgb(231, 231, 231);
 }
 
 .audio .bg {
@@ -128,7 +128,7 @@
   background-color:#13227a;
 }
 .selected{
-  background-color:#bda8bd !important;
+  background-color:rgb(254, 91, 43) !important;
 }
 .normal{
 
@@ -139,7 +139,7 @@
         <scroll-view scroll-y style="height: {{listHeight}}px;">
           <block wx:if="{{ type1Show }}" wx:for-items="{{playlist}}" wx:for-index="index" wx:key="index" wx:for-item="item">
             <van-cell title="{{item.title}}" custom-class="{{index == selectedIndex ? 'selected':'normal'}}" value="歌手：{{item.artist}}" size="large"  label="专辑：{{item.album}}" @tap="select1({{index}})" >
-              <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#13227a" size="20px" @tap.stop="like1({{item}},{{index}})"/>
+              <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap.stop="like1({{item}},{{index}})"/>
             </van-cell>
           </block>
           <block wx:if="{{ type2Show }}" wx:for-items="{{playlist.sections}}" wx:for-index="sec" wx:key="sec" wx:for-item="section">
@@ -147,7 +147,7 @@
             </van-cell>
             <block wx:for-items="{{section.items}}" wx:for-index="index" wx:key="index" wx:for-item="item">
               <van-cell title="{{item.title}}" custom-class="{{(index == sel_row && sec == sel_sec) ? 'selected':'normal'}}" size="large" value="歌手：{{item.artist}}" label="专辑：{{item.album}}" @tap="select2({{sec}},{{index}})" >
-                <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#13227a" size="20px" @tap.stop="like2({{item}},{{sec}},{{index}})"/>
+                <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap.stop="like2({{item}},{{sec}},{{index}})"/>
               </van-cell>
             </block>
           </block>
@@ -211,7 +211,7 @@
       cur_sid(){
         if (this.playlist.sections) 
         {
-          console.log(this.playlist.sections[this.sel_sec].items[this.sel_row].sid);
+          // console.log(this.playlist.sections[this.sel_sec].items[this.sel_row].sid);
           return this.playlist.sections[this.sel_sec].items[this.sel_row].sid
         } 
         else 
@@ -291,6 +291,10 @@
         let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_fav&p=json'
         wepy.request({  
           url: url,  
+          header: {
+            // "Cookie":"PHPSESSID="+wepy.getStorageSync('sessionid'),
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+          },
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
             "type":self.playlist[index].isFavorite == true ? 3:1,
@@ -314,6 +318,10 @@
         let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_fav&p=json'
         wepy.request({  
           url: url,  
+          header: {
+            // "Cookie":"PHPSESSID="+wepy.getStorageSync('sessionid'),
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+          },
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
             "type":self.playlist.sections[sec].items[row].isFavorite == true ? 3:1,
@@ -399,6 +407,10 @@
       }
       wepy.request({  
           url: url,  
+          header: {
+            // "Cookie":"PHPSESSID="+wepy.getStorageSync('sessionid'),
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+          },
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
             "title": 'BBC' + this.custom_selectedName(),
@@ -440,7 +452,7 @@
       
     }
     custom_selectedName () {
-      console.log(this.playlist);
+      // console.log(this.playlist);
       if (this.type1Show == true) 
       {
         if (this.playlist.length == 0) 
@@ -507,13 +519,10 @@
         else 
         {
           this.custom_sec_index_cul()
-          console.log(this.sel_sec);
-          console.log(this.sel_row);
           let fileid = this.playlist.sections[this.sel_sec].items[this.sel_row].fileid
           let a = fileid.substring(0,2)
           let b = fileid.substring(2,4)
           httpUrl = httpUrl + a + '/' + b + '/' + fileid + '.mp3'
-          console.log(httpUrl);
           return httpUrl
         }
       }
@@ -555,6 +564,10 @@
         'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_favlist&usersid=' + this.$parent.globalData.businessData.userInfo.sid
       wepy.request({
         url: url,
+        header: {
+          // "Cookie":"PHPSESSID="+wepy.getStorageSync('sessionid'),
+          "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+        },
         data: {},
         method: 'GET',
         success: function(res) {
@@ -606,6 +619,7 @@
     }
     onLoad() {
       let self = this
+      this.login()
       this.backgroundAudioManager = wx.getBackgroundAudioManager()
       this.backgroundAudioManager.onTimeUpdate(()=>{
         self.duration = self.backgroundAudioManager.duration
@@ -621,57 +635,90 @@
       }
     }
 
+    login() {
+    let self = this
+    wx.login({
+      success (res) {
+        if (res.code) {
+          //发起网络请求
+          wx.request({
+            url: 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_applogin',
+            data: {
+              code: res.code
+            },
+            success:function (res) {
+              console.log(res.data.sessionid);
+              // wx.setStorageSync('sessionid',res.data.sessionid)
+              self.$parent.globalData.sessionid = res.data.sessionid
+              // wx.setStorage('sessionid',res.data.sessionid)
+              self.fetchData()
+            }
+          })
+        } else {
+          console.log('登录失败！' + res.errMsg)
+        }
+      }
+    })
+  }
+
+  kickshop(shopsid){
+    let self = this
+    let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_kickshop&shopsid='+shopsid
+    wepy.request({  
+        url: url,  
+        header: {
+          // "Cookie":"PHPSESSID="+wepy.getStorageSync('sessionid'),
+          "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+        },
+        data: {},  
+        method: 'POST',   
+        success: function(res){ 
+          console.log(res);
+        }  
+    });
+  }
+
+  fetchData(options) {
+    let self = this
+    let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=index&p=json'
+    wepy.request({  
+        url: url,  
+        header: {
+          // "Cookie":"PHPSESSID="+wepy.getStorageSync('sessionid'),
+          "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+        },
+        data: {},  
+        method: 'GET',   
+        success: function(res){ 
+          console.log(res);
+          self.$parent.globalData.businessData = res.data
+          let shopsid = wepy.getStorageSync('shopsid')
+          if (shopsid == undefined) 
+          {
+            
+          }
+          else
+          {
+            self.kickshop(shopsid)
+            let shopsid = wepy.getStorageSync('shopsid')
+            if (shopsid == undefined) 
+            {
+              
+            }
+            else
+            {
+              self.$parent.globalData.current_shopsid = shopsid
+              wepy.navigateTo({
+                url: '/pages/shop_home?shopsid='+shopsid
+              })
+            }
+          }
+        }  
+    });
+  }
+
     custom_updateSid() {
       this.custom_refresh_fav()
-      
-      // console.log(this.$parent.globalData.cur_playlist);      
-      // if (this.$parent.globalData.cur_playlist.sections) 
-      // {
-      //   console.log("custom_updateSid1");
-      //   this.playlist = this.$parent.globalData.cur_playlist
-      //   return
-      // }
-      // this.playlist = []
-      // console.log("custom_updateSid");
-      // let self = this
-      // let sid = this.$parent.globalData.cur_plist_list_sid
-      // console.log(sid);
-      // Toast.loading({
-      //   mask: true,
-      //   message: '加载中...'
-      // });
-      // // let url = 'http://47.96.191.22/client/index.php?m=bbc&c=index&a=s_playlist&p=json&sid=' + sid
-      // let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_itemlist&p=json'
-      // wepy.request({  
-      //     url: url,  
-      //     data: {
-      //       "usersid":this.$parent.globalData.businessData.userInfo.sid,
-      //       "playlistsid":sid
-      //     },  
-      //     method: 'GET',   
-      //     success: function(res){ 
-      //         Toast.clear()
-      //         if (res.data.status == 1) 
-      //         {
-      //           console.log('aaaaaa');
-      //           console.log(res.data.items)
-      //           self.playlist = res.data.items
-      //           self.$apply()
-      //           if (self.playlist.length) 
-      //           {
-      //             self.custom_play()
-      //           }
-      //           else
-      //           {
-      //             Toast("暂无数据！") 
-      //           }
-      //         } 
-      //         else 
-      //         {
-      //          Toast("请求失败！") 
-      //         }
-      //     }  
-      // });
     }
   }
 </script>
