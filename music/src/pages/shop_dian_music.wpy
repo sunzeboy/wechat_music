@@ -12,6 +12,10 @@
       padding-left:15px;
       padding-bottom: 10px;
     }
+    .music-type-btn{
+      margin-left:15px;
+      margin-top:15px;
+    }
 </style>
 
 <template>
@@ -28,7 +32,7 @@
     use-slot
     show="{{ isDialogShow }}"
     show-cancel-button
-    bind:close="onDialogClose"
+    bind:close="onDialogClose(1)"
     bind:confirm="addOrderPlayList"
     async-close=true
     >
@@ -53,21 +57,12 @@
         bind:change="typePhone"
       />
       <van-checkbox value="{{ isNeedSMS }}" custom-class="sms-checkbox" bind:change="onSMSChange">短信通知</van-checkbox>
-      <!-- <van-field
-        value="{{ notifyTimeDesc }}"
-        label="通知时间"
-        placeholder="请选择通知时间"
-        error-message="{{errorMessagePhone}}"
-        border="{{ false }}"
-        bind:focus="typeNotifyTime"
-      /> -->
-      <!-- <van-cell-group> -->
         <van-cell title="请选择通知时间" bind:click="typeNotifyTime" value="{{ notifyTimeDesc }}" />
-      <!-- </van-cell-group> -->
       <p style="color: red;">点播歌曲需要花费10点积分</p>
     </van-cell-group>
     </van-dialog>
-    <van-action-sheet
+
+    <!-- <van-action-sheet
       show="{{ actionSheetShow }}"
       actions="{{ actionSheetDatas }}"
       cancel-text="取消"
@@ -75,7 +70,21 @@
       z-index=100000
       close-on-click-overlay=true
       bind:cancel="onCancelActionSheet"
-    />
+    /> -->
+    <van-dialog
+      title="选择歌曲类型"
+      use-slot
+      show="{{ actionSheetShow }}"
+      show-cancel-button
+      bind:close="onDialogClose"
+      bind:confirm="addOrderPlayList"
+      async-close=true
+    >
+      <block wx:for-items="{{musicTypeList}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+          <van-button custom-class="music-type-btn" @tap='selectMusicType({{item}})' type="primary">{{item.title}}</van-button>
+      </block>
+    </van-dialog>
+
     <van-popup
       show="{{ isTimePickerShow1 }}"
       position="bottom"
@@ -111,6 +120,7 @@
       min-date="{{ minDate2 }}"
     />
     </van-popup>
+
     <van-toast id="van-toast" />
 </template>
 
@@ -161,6 +171,35 @@
       filesid:'',
       daytick:'',
       phone:'',
+      musicTypeList:[
+        {
+          'title':'流行1',
+        },
+        {
+          'title':'流行2',
+        },
+        {
+          'title':'流行3',
+        },
+        {
+          'title':'流行4',
+        },
+        {
+          'title':'流行5',
+        },
+        {
+          'title':'流行6',
+        },
+        {
+          'title':'流行7',
+        },
+        {
+          'title':'流行8',
+        },
+        {
+          'title':'流行9',
+        },
+      ],
       actionSheetDatas: [
         {
           name: '歌曲1',
@@ -217,6 +256,12 @@
     }
 
     methods = {
+      selectMusicType(item) {
+        this.actionSheetShow = false
+        wepy.navigateTo({
+          url: '/pages/music_select_list'
+        })
+      },
       onClose(){
         this.isTimePickerShow1 = false
         this.isTimePickerShow2 = false
@@ -232,8 +277,15 @@
         this.daytick = item.daytick
         this.isDialogShow = true
       },
-      onDialogClose() {
-        this.isDialogShow = false
+      onDialogClose(type) {
+        if (type == '1') 
+        {
+          this.isDialogShow = false
+        } 
+        else
+        {
+          this.actionSheetShow = false
+        }
       },
       selectMusic(){
         this.actionSheetShow = true
@@ -361,6 +413,10 @@
     }
     onShow() {
       this.custom_orderplay_getmusics()
+      if (this.$parent.globalData.dian_music) 
+      {
+        this.selectedMusicName = this.$parent.globalData.dian_music.title
+      }
     }
     onLoad() {
       

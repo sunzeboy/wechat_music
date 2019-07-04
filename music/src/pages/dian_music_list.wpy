@@ -30,7 +30,7 @@
         <van-button size="large" @tap="add" >+点歌</van-button>
     </view>
     
-      <van-dialog id="van-dialog" />
+    <van-dialog id="van-dialog" />
 
 </template>
 

@@ -32,7 +32,8 @@ export default class extends wepy.app {
       'pages/shop_home',
       'pages/music_shop',
       'pages/dian_music_list',
-      'pages/shop_dian_music'
+      'pages/shop_dian_music',
+      'pages/music_select_list'
     ],
     window: {
       backgroundTextStyle: 'light',

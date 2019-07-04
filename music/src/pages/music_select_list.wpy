@@ -1,0 +1,98 @@
+<style lang="less">
+    
+</style>
+
+<template>
+    <block wx:for-items="{{musiclist}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+      <van-cell title="{{item.title}}" custom-class="{{index == selectedIndex ? 'selected':'normal'}}" value="歌手：{{item.artist}}" size="large"  label="专辑：{{item.album}}" @tap="selectMusic({{item}})" >
+        <!-- <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap.stop="like1({{item}},{{index}})"/> -->
+      </van-cell>
+    </block>
+
+    <van-toast id="van-toast" />
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import * as api from '../api/api.js'
+  import Toast from '../styles/vant/toast/toast';
+
+
+  export default class Music_Select_List extends wepy.page {
+    config = {
+      navigationBarTitleText: '选歌',
+      component: true,
+      usingComponents: {
+        'van-cell': '/styles/vant/cell/index',
+        'van-cell-group': '/styles/vant/cell-group/index',
+        'van-button': '/styles/vant/button/index',
+        'van-icon': '/styles/vant/icon/index',
+        'van-field': '/styles/vant/field/index',
+        'van-swipe-cell': '/styles/vant/swipe-cell/index',
+        "van-toast": "/styles/vant/toast/index",
+        "van-datetime-picker": "/styles/vant/datetime-picker/index",
+        'van-dialog': '/styles/vant/dialog/index',
+        'van-checkbox': '/styles/vant/checkbox/index',
+        "van-popup": "/styles/vant/popup/index",
+        "van-action-sheet": "/styles/vant/action-sheet/index"
+      }
+    }
+    components = {
+      
+    }
+
+
+    data = {
+      musiclist:[{
+        'title':'歌曲1',
+        'artist':'aaa',
+        'album':'bbb'
+      },{
+        'title':'歌曲2',
+        'artist':'aaa',
+        'album':'bbb'
+      },{
+        'title':'歌曲3',
+        'artist':'aaa',
+        'album':'bbb'
+      },{
+        'title':'歌曲4',
+        'artist':'aaa',
+        'album':'bbb'
+      },{
+        'title':'歌曲5',
+        'artist':'aaa',
+        'album':'bbb'
+      },{
+        'title':'歌曲6',
+        'artist':'aaa',
+        'album':'bbb'
+      },]
+      
+    }
+
+    computed = {
+      
+    }
+    
+
+    methods = {
+      selectMusic(item){
+        this.$parent.globalData.dian_music = item
+        wepy.navigateBack({
+          delta:1
+        })
+      }
+    }
+    
+    events = {
+      
+    }
+    onShow() {
+
+    }
+    onLoad() {
+      
+    }
+  }
+</script>
