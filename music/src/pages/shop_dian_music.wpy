@@ -416,6 +416,8 @@
       if (this.$parent.globalData.dian_music) 
       {
         this.selectedMusicName = this.$parent.globalData.dian_music.title
+        // TODO
+        this.filesid = ''
       }
     }
     onLoad() {

@@ -71,6 +71,7 @@ export default class extends wepy.app {
   }
 
   globalData = {
+    dian_music:'',/* 点歌中的选择歌曲*/
     sessionid:'',
     sel_sec:0,
     sel_row:0,
