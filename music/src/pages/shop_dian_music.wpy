@@ -83,7 +83,7 @@
       async-close=true
     >
       <block wx:for-items="{{actionSheetDatas}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-          <van-button custom-class="music-type-btn" @tap='selectMusicType({{item}})' type="primary">{{item.grouptitle}}</van-button>
+          <van-button custom-class="music-type-btn" @tap='selectMusicType({{item}})' type="primary">{{item.title}}</van-button>
       </block>
     </van-dialog>
 
@@ -261,7 +261,7 @@
       selectMusicType(item) {
         this.actionSheetShow = false
         wepy.navigateTo({
-          url: '/pages/music_select_list?musiclist='+JSON.stringify(item)
+          url: '/pages/music_select_list?musiclist='+ encodeURIComponent(JSON.stringify(item))
         })
       },
       onClose(){
@@ -400,6 +400,7 @@
           wepy.navigateBack({
             delta:1
           })
+          self.$parent.globalData.dian_music = {}
         }
       });
     }

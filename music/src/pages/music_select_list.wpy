@@ -68,9 +68,7 @@
 
     }
     onLoad(options) {
-      console.log(options);
-      
-      this.musiclist = JSON.parse(options.musiclist);
+      this.musiclist = JSON.parse(decodeURIComponent(options.musiclist));
     }
   }
 </script>
