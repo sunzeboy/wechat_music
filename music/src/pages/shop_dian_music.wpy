@@ -13,8 +13,10 @@
       padding-bottom: 10px;
     }
     .music-type-btn{
-      margin-left:15px;
-      margin-top:15px;
+      margin-left:5%;
+      margin-top:5px;
+      margin-bottom: 15px;
+      width: 40%;
     }
 </style>
 
@@ -80,8 +82,8 @@
       bind:confirm="addOrderPlayList"
       async-close=true
     >
-      <block wx:for-items="{{musicTypeList}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-          <van-button custom-class="music-type-btn" @tap='selectMusicType({{item}})' type="primary">{{item.title}}</van-button>
+      <block wx:for-items="{{actionSheetDatas}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+          <van-button custom-class="music-type-btn" @tap='selectMusicType({{item}})' type="primary">{{item.grouptitle}}</van-button>
       </block>
     </van-dialog>
 
@@ -259,7 +261,7 @@
       selectMusicType(item) {
         this.actionSheetShow = false
         wepy.navigateTo({
-          url: '/pages/music_select_list'
+          url: '/pages/music_select_list?musiclist='+JSON.stringify(item)
         })
       },
       onClose(){
@@ -358,10 +360,6 @@
         method: 'GET',
         success: function(res) {
           self.actionSheetDatas = res.data.items;
-          self.actionSheetDatas.forEach(element => {
-            element.name = element.title
-            element.subname = '歌手：'+element.artist
-          });
           self.$apply();
         }
       });
@@ -417,7 +415,7 @@
       {
         this.selectedMusicName = this.$parent.globalData.dian_music.title
         // TODO
-        this.filesid = ''
+        this.filesid = this.$parent.globalData.dian_music.sid
       }
     }
     onLoad() {

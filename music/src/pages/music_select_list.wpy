@@ -3,7 +3,7 @@
 </style>
 
 <template>
-    <block wx:for-items="{{musiclist}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+    <block wx:for-items="{{musiclist.items}}" wx:for-index="index" wx:key="index" wx:for-item="item">
       <van-cell title="{{item.title}}" custom-class="{{index == selectedIndex ? 'selected':'normal'}}" value="歌手：{{item.artist}}" size="large"  label="专辑：{{item.album}}" @tap="selectMusic({{item}})" >
         <!-- <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap.stop="like1({{item}},{{index}})"/> -->
       </van-cell>
@@ -43,31 +43,7 @@
 
 
     data = {
-      musiclist:[{
-        'title':'歌曲1',
-        'artist':'aaa',
-        'album':'bbb'
-      },{
-        'title':'歌曲2',
-        'artist':'aaa',
-        'album':'bbb'
-      },{
-        'title':'歌曲3',
-        'artist':'aaa',
-        'album':'bbb'
-      },{
-        'title':'歌曲4',
-        'artist':'aaa',
-        'album':'bbb'
-      },{
-        'title':'歌曲5',
-        'artist':'aaa',
-        'album':'bbb'
-      },{
-        'title':'歌曲6',
-        'artist':'aaa',
-        'album':'bbb'
-      },]
+      musiclist:[]
       
     }
 
@@ -91,8 +67,10 @@
     onShow() {
 
     }
-    onLoad() {
+    onLoad(options) {
+      console.log(options);
       
+      this.musiclist = JSON.parse(options.musiclist);
     }
   }
 </script>
