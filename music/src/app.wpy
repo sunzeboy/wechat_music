@@ -116,7 +116,7 @@ export default class extends wepy.app {
   },
   custom_uploadLog(){
       console.log("custom_uploadLog");
-      let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_addlog&p=json'
+      let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_addlog&p=json'
       var filesid = ''
       console.log(this.playlist);
       if (this.cur_plist_list_sid > 0) 
@@ -158,7 +158,7 @@ export default class extends wepy.app {
       } 
       else 
       {
-        if (this.playlist.sections == undefined) 
+        if (!this.playlist.sections) 
         {
           return '' 
         } 
@@ -184,7 +184,7 @@ export default class extends wepy.app {
       } 
       else 
       {
-        if (this.playlist.sections == undefined) 
+        if (!this.playlist.sections) 
         {
           return '' 
         } 
@@ -228,7 +228,7 @@ export default class extends wepy.app {
       } 
       else 
       {
-        if (this.playlist.sections == undefined) 
+        if (!this.playlist.sections) 
         {
           return ''
         } 
@@ -299,8 +299,8 @@ export default class extends wepy.app {
 
   onLaunch(options) {
     // this.testAsync()
-    // wepy.setStorageSync('shopsid', options.query.shopsid);//存储openid  
-    wepy.setStorageSync('shopsid', 1255);//存储openid  
+    wepy.setStorageSync('shopsid', options.query.shopsid);//存储openid  
+    // wepy.setStorageSync('shopsid', 1255);//存储openid  
 
     // this.getUserInfo()
     // this.login()
@@ -321,7 +321,7 @@ export default class extends wepy.app {
         if (res.code) {
           //发起网络请求
           wx.request({
-            url: 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_applogin',
+            url: 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_applogin',
             data: {
               code: res.code
             },
@@ -330,7 +330,7 @@ export default class extends wepy.app {
               wepy.setStorageSync('sessionid',res.data.sessionid)
               self.fetchData()
               let shopsid = wepy.getStorageSync('shopsid')
-              if (shopsid == undefined) 
+              if (!shopsid || shopsid == '') 
               {
                 
               }
@@ -349,8 +349,8 @@ export default class extends wepy.app {
 
   kickshop(shopsid){
     let self = this
-    let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_kickshop&shopsid='+shopsid
-    // let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=index&unionid=aaaaaa&openid='+options.openid
+    let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_kickshop&shopsid='+shopsid
+    // let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=index&unionid=aaaaaa&openid='+options.openid
     wepy.request({  
         url: url,  
         header: {
@@ -367,8 +367,8 @@ export default class extends wepy.app {
 
   fetchData(options) {
     let self = this
-    let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=index&p=json'
-    // let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=index&unionid=aaaaaa&openid='+options.openid
+    let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=index&p=json'
+    // let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=index&unionid=aaaaaa&openid='+options.openid
     wepy.request({  
         url: url,  
         header: {

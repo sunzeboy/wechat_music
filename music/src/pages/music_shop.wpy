@@ -63,7 +63,7 @@
     computed = {
       shops(){
         var array = this.$parent.globalData.businessData.shops
-        if (array == undefined) return;
+        if (!array) return;
         array.forEach(element => {
           // element.timeDesc = utils.timeDesc(element.lasthit)
           element.timeDesc = utils.timeDesc()

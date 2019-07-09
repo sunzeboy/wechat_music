@@ -288,7 +288,7 @@
           mask: true,
           message: '加载中...'
         });
-        let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_fav&p=json'
+        let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_fav&p=json'
         wepy.request({  
           url: url,  
           header: {
@@ -315,7 +315,7 @@
           mask: true,
           message: '加载中...'
         });
-        let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_fav&p=json'
+        let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_fav&p=json'
         wepy.request({  
           url: url,  
           header: {
@@ -393,7 +393,7 @@
       console.log(this.sel_sec);
       console.log(this.sel_row);
       
-      let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_addlog&p=json'
+      let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_addlog&p=json'
       var filesid = ''
       if (this.type1Show == true) 
       {
@@ -439,7 +439,7 @@
       } 
       else 
       {
-        if (this.playlist.sections == undefined) 
+        if (!this.playlist.sections) 
         {
           return '' 
         } 
@@ -467,7 +467,7 @@
       } 
       else 
       {
-        if (this.playlist.sections == undefined) 
+        if (!this.playlist.sections) 
         {
           return '' 
         } 
@@ -493,7 +493,7 @@
       }
     }
     custom_selectedUrl () {
-      var httpUrl = "http://47.96.191.22/upload/music/"
+      var httpUrl = "https://web.sound-genie.com/upload/music/"
       if (this.type1Show == true) 
       {
         if (this.playlist.length == 0) 
@@ -512,7 +512,7 @@
       } 
       else 
       {
-        if (this.playlist.sections == undefined) 
+        if (!this.playlist.sections) 
         {
           return ''
         } 
@@ -561,7 +561,7 @@
     custom_refresh_fav(options){
       let self = this;
       let url =
-        'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_favlist&usersid=' + this.$parent.globalData.businessData.userInfo.sid
+        'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_favlist&usersid=' + this.$parent.globalData.businessData.userInfo.sid
       wepy.request({
         url: url,
         header: {
@@ -640,9 +640,11 @@
     wx.login({
       success (res) {
         if (res.code) {
+          console.log(res.code);
+          
           //发起网络请求
           wx.request({
-            url: 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_applogin',
+            url: 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_applogin',
             data: {
               code: res.code
             },
@@ -663,7 +665,7 @@
 
   kickshop(shopsid){
     let self = this
-    let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_kickshop&shopsid='+shopsid
+    let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_kickshop&shopsid='+shopsid
     wepy.request({  
         url: url,  
         header: {
@@ -680,7 +682,7 @@
 
   fetchData(options) {
     let self = this
-    let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=index&p=json'
+    let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=index&p=json'
     wepy.request({  
         url: url,  
         header: {
@@ -693,7 +695,8 @@
           console.log(res);
           self.$parent.globalData.businessData = res.data
           let shopsid = wepy.getStorageSync('shopsid')
-          if (shopsid == undefined) 
+          // debugger;
+          if (!shopsid || shopsid == '') 
           {
             
           }
@@ -701,7 +704,7 @@
           {
             self.kickshop(shopsid)
             let shopsid = wepy.getStorageSync('shopsid')
-            if (shopsid == undefined) 
+            if (!shopsid || shopsid == '') 
             {
               
             }

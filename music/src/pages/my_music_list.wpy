@@ -39,7 +39,7 @@
                 <block wx:for-items="{{playlists}}" wx:for-index="index" wx:key="index" wx:for-item="item">
                     <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}"  async-close bind:close="onCellClose(1,{{item}})">
                         <van-cell title="{{item.title}}"  value="{{item.cnt}}首" label="备注：{{item.comment}}" class="section">
-                            <van-icon slot="icon" name="http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_img&sid={{item.sid}}" style="margin-right:15px;" class="custom-icon"  size="40px"/>
+                            <van-icon slot="icon" name="https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_gedan_img&sid={{item.sid}}" style="margin-right:15px;" class="custom-icon"  size="40px"/>
                             <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#FB5A26" size="20px" style="margin-left:15px;" @tap="playAndAddToPlayList({{item.sid}})"/>
                             <van-icon slot="right-icon" name="edit" class="custom-icon" color="#FB5A26" size="20px" style="margin-left:25px;" @tap="edit({{item}})"/>
                         </van-cell>
@@ -229,7 +229,7 @@ export default class MyMusic_list extends wepy.page {
           tempArray.push(element.filesid)
         } 
       });
-      let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_item&p=json'
+      let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_gedan_item&p=json'
       wepy.request({  
           url: url, 
           header: {
@@ -297,7 +297,7 @@ export default class MyMusic_list extends wepy.page {
         return
       }
       let self = this;
-      let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan&p=json'
+      let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_gedan&p=json'
       wepy.request({  
           url: url, 
           header: {
@@ -412,7 +412,7 @@ export default class MyMusic_list extends wepy.page {
       this.isEdit = true
       this.music_list_name = item.title.replace(/[\r\n]/g,"");
       this.comment_name = item.comment.replace(/[\r\n]/g,"");
-      this.music_list_url = "http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_img&sid="+item.sid
+      this.music_list_url = "https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_gedan_img&sid="+item.sid
       this.isDialogShow = true;
     },
     playAndAddToPlayList(sid) {
@@ -425,7 +425,7 @@ export default class MyMusic_list extends wepy.page {
         mask: true,
         message: '加载中...'
       });
-      let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan_itemlist&p=json'
+      let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_gedan_itemlist&p=json'
       wepy.request({  
           url: url, 
           header: {
@@ -470,7 +470,7 @@ export default class MyMusic_list extends wepy.page {
   custom_del_favlist(instance,item){
     console.log(item);
     var self = this
-    let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_fav&p=json'
+    let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_fav&p=json'
     wepy.request({  
         url: url, 
         header: {
@@ -498,7 +498,7 @@ export default class MyMusic_list extends wepy.page {
   }
   custom_del_playlist(instance,item){
     var self = this
-    let url = 'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedan&p=json'
+    let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_gedan&p=json'
     wepy.request({  
         url: url,  
         header: {
@@ -537,7 +537,7 @@ export default class MyMusic_list extends wepy.page {
   custom_refresh_gedan(){
     let self = this;
     let url =
-      'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_gedanlist&usersid=' + this.$parent.globalData.businessData.userInfo.sid
+      'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_gedanlist&usersid=' + this.$parent.globalData.businessData.userInfo.sid
     wepy.request({
       url: url,
       header: {
@@ -555,7 +555,7 @@ export default class MyMusic_list extends wepy.page {
   custom_refresh_fav(){
     let self = this;
     let url =
-      'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_favlist&usersid=' + this.$parent.globalData.businessData.userInfo.sid
+      'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_favlist&usersid=' + this.$parent.globalData.businessData.userInfo.sid
     wepy.request({
       url: url,
       header: {
