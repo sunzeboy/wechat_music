@@ -196,6 +196,7 @@
     }
 
     data = {
+      shopsid:'',
       favorites:[],
       sel_sec:0,
       sel_row:0,
@@ -617,7 +618,11 @@
         t = time + ':' + ((t % 60) / 100).toFixed(2).slice(-2)
         return t
     }
-    onLoad() {
+    onLoad(options) {
+      if (options.shopsid) 
+      {
+        this.shopsid = options.shopsid
+      }
       let self = this
       this.login()
       this.backgroundAudioManager = wx.getBackgroundAudioManager()
@@ -663,13 +668,12 @@
     })
   }
 
-  kickshop(shopsid){
+  kickshop(){
     let self = this
-    let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_kickshop&shopsid='+shopsid
+    let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_kickshop&shopsid='+this.shopsid
     wepy.request({  
         url: url,  
         header: {
-          // "Cookie":"PHPSESSID="+wepy.getStorageSync('sessionid'),
           "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
         },
         data: {},  
@@ -694,27 +698,17 @@
         success: function(res){ 
           console.log(res);
           self.$parent.globalData.businessData = res.data
-          let shopsid = wepy.getStorageSync('shopsid')
-          // debugger;
-          if (!shopsid || shopsid == '') 
+          if (!self.shopsid || self.shopsid == '') 
           {
             
           }
           else
           {
-            self.kickshop(shopsid)
-            let shopsid = wepy.getStorageSync('shopsid')
-            if (!shopsid || shopsid == '') 
-            {
-              
-            }
-            else
-            {
-              self.$parent.globalData.current_shopsid = shopsid
-              wepy.navigateTo({
-                url: '/pages/shop_home?shopsid='+shopsid
-              })
-            }
+            self.kickshop()
+            self.$parent.globalData.current_shopsid = self.shopsid
+            wepy.navigateTo({
+              url: '/pages/shop_home?shopsid='+self.shopsid
+            })
           }
         }  
     });

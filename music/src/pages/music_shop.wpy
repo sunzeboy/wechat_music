@@ -11,7 +11,7 @@
     </demo-block>
     <demo-block title="逛店达人榜">
             <block wx:for-items="{{talent_list}}" wx:for-index="index" wx:key="index"  wx:for-item="item">
-                <van-cell title="{{index+1 + '.' + item.nickName}}" value="逛店铺数:{{item.shopTime}}" />
+                <van-cell title="{{index+1 + '.' + item.nickname}}" value="逛店铺数:{{item.shopcnt}}" />
                 </van-cell>
             </block>
     </demo-block>
@@ -47,17 +47,7 @@
         "shopName":"金桥国际广场",
         "lastTime":"2019-4-2"
       }],
-      talent_list:[
-          {
-        "nickName":"张三",
-        "shopTime":"22"
-      },{
-        "nickName":"李四",
-        "shopTime":"10"
-      },{
-        "nickName":"王五",
-        "shopTime":"8"
-      }]
+      talent_list:[]
     }
 
     computed = {
@@ -71,7 +61,11 @@
         console.log(array);
         return array
       },
-      
+      talent_list(){
+        var array = this.$parent.globalData.businessData.tops
+        if (!array) return [];
+        return array
+      },
     }
 
     methods = {
@@ -85,12 +79,17 @@
     custom_lastTime(index){
       return '上次逛店时间：'+ utils.timeDesc(this.$parent.globalData.businessData.shops[index].lasthit)
     }
+
     events = {
       
     }
 
     onLoad() {
       
+    }
+
+    onShow(){
+
     }
   }
 </script>

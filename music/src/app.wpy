@@ -298,12 +298,6 @@ export default class extends wepy.app {
   }
 
   onLaunch(options) {
-    // this.testAsync()
-    wepy.setStorageSync('shopsid', options.query.shopsid);//存储openid  
-    // wepy.setStorageSync('shopsid', 1255);//存储openid  
-
-    // this.getUserInfo()
-    // this.login()
     this.globalData.play()
     let self = this
     wepy.getSystemInfo({
