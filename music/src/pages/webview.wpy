@@ -3,7 +3,7 @@
 </style>
 
 <template>
-    <web-view src="http://www.apple.com/cn/">
+    <web-view src="{{url}}">
         
     </web-view>
 
@@ -24,7 +24,7 @@
 
 
     data = {
-      phoneNum:'',
+      url:'',
       code:'',
       openid:''
     }
@@ -50,7 +50,8 @@
     }
 
     onLoad(options) {
-      
+      this.url = decodeURIComponent(options.url);
     }
+
   }
 </script>

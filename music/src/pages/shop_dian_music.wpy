@@ -330,7 +330,7 @@
     custom_orderplay_gettimes(){
       let self = this;
       let url =
-        'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_orderplay_ticks&sid=449'/*+this.$parent.globalData.current_shopsid*/+'&daytime='+ (new Date(new Date(this.currentDate).toLocaleDateString()).getTime())/1000
+        'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_orderplay_ticks&sid=449'/*+this.$parent.globalData.current_shopsid*/+'&daytime='+ (new Date(new Date(this.currentDate).toLocaleDateString()).getTime())/1000
       wepy.request({
         url: url,
         header: {
@@ -350,7 +350,7 @@
     custom_orderplay_getmusics(){
       let self = this;
       let url =
-        'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_orderplay_filelist&p=json'
+        'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_orderplay_filelist&p=json'
       wepy.request({
         url: url,
         header: {
@@ -379,7 +379,7 @@
 
       let self = this;
       let url =
-        'http://47.96.191.22/client/index.php?m=bbc&c=micro&a=s_orderplay_add&p=json'
+        'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_orderplay_add&p=json'
       wepy.request({
         url: url,
         header: {

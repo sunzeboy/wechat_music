@@ -210,7 +210,7 @@ export default class extends wepy.app {
       }
     },
     custom_selectedUrl () {
-      var httpUrl = "http://47.96.191.22/upload/music/"
+      var httpUrl = "https://web.sound-genie.com/upload/music/"
       if (this.cur_plist_list_sid > 0) 
       {
         if (this.playlist.length == 0) 

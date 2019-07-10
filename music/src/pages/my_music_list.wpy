@@ -194,6 +194,7 @@ export default class MyMusic_list extends wepy.page {
 
   data = {
     type:0,
+    gedan_sid:'',
     isEdit:false,
     img_base64:'',
     music_list_url:'',
@@ -214,7 +215,7 @@ export default class MyMusic_list extends wepy.page {
 
   computed = {
     img_url(){
-      return this.music_list_url ? this.music_list_url : "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1559297222849&di=7e6117d3bc7e3a6aa7af3ebff4ab68de&imgtype=0&src=http%3A%2F%2Fpic.51yuansu.com%2Fpic3%2Fcover%2F02%2F21%2F00%2F59afc619caa9e_610.jpg"
+      return this.music_list_url ? this.music_list_url : ""
     }
   };
 
@@ -292,7 +293,7 @@ export default class MyMusic_list extends wepy.page {
         Toast('请输入备注名称');
         return
       }
-      if (this.img_base64=='') {
+      if (this.img_base64=='' && this.img_url == '') {
         Toast('请选择图片');
         return
       }
@@ -305,7 +306,7 @@ export default class MyMusic_list extends wepy.page {
           }, 
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
-            "sid":'',
+            "sid":this.isEdit == true ? this.gedan_sid:'',
             "type":this.isEdit == true ? 2:1,
             "title":this.music_list_name,
             "comment":this.comment_name,
@@ -322,6 +323,7 @@ export default class MyMusic_list extends wepy.page {
                 Toast('创建歌单成功！');
               }
               self.isEdit = false
+              self.gedan_sid = ''
               self.$apply()
               self.custom_refresh_gedan()
               console.log(res);
@@ -410,6 +412,7 @@ export default class MyMusic_list extends wepy.page {
     },
     edit(item) {
       this.isEdit = true
+      this.gedan_sid = item.sid;
       this.music_list_name = item.title.replace(/[\r\n]/g,"");
       this.comment_name = item.comment.replace(/[\r\n]/g,"");
       this.music_list_url = "https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_gedan_img&sid="+item.sid

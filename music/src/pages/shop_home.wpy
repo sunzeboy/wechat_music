@@ -6,8 +6,8 @@
 </style>
 
 <template>
-    <image style="width: 100%; height: 200px; background-color: #eeeeee;" src="{{'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_shop_bbc_img&shopsid='+shopsid}}"></image>
-    <van-cell title="当前播放列表" class="section">
+    <image style="width: 100%; height: 200px; background-color: #eeeeee;" src="{{'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_shop_img&sid='+shopsid}}"></image>
+    <van-cell title="{{shopInfo.name}} 当前的店堂音乐" class="section">
         <van-icon slot="right-icon" name="todo-list-o" class="custom-icon" color="#FB5A26" size="20px" @tap="dianMusic"/>
         <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#FB5A26" size="20px" style="margin-left:25px;" @tap="playMusic"/>
     </van-cell>
@@ -46,6 +46,7 @@
     data = {
         playlist:[],
         favorites:[],
+        shopInfo:{},
         shopsid:''
     }
 
@@ -76,10 +77,6 @@
       },
       like(item,sec,row){
         let self = this
-        // Toast.loading({
-        //   mask: true,
-        //   message: '加载中...'
-        // });
         let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_fav&p=json'
         wepy.request({  
           url: url, 
@@ -97,7 +94,6 @@
             console.log(res);
             self.playlist.sections[sec].items[row].isFavorite = !self.playlist.sections[sec].items[row].isFavorite
             self.$apply()
-            // Toast.clear()
           }  
         });
       }
@@ -119,7 +115,6 @@
       wepy.request({
         url: url,
         header: {
-          // "Cookie":"PHPSESSID="+wepy.getStorageSync('sessionid'),
           "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
         },
         data: {},
@@ -133,15 +128,10 @@
     }
     custom_refresh_playlist(options){
       let self = this
-      // Toast.loading({
-      //   mask: true,
-      //   message: '加载中...'
-      // });
       let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_playlist&p=json'
       wepy.request({  
         url: url,  
         header: {
-          // "Cookie":"PHPSESSID="+wepy.getStorageSync('sessionid'),
           "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
         },
         data: {
@@ -152,6 +142,7 @@
           console.log(res);
           var playlist = res.data.playlist
           var addlist = res.data.addlist
+          self.shopInfo = res.data.shopInfo
           if (addlist == null && playlist == null) 
           {
             return;
@@ -189,7 +180,6 @@
             console.log('--------------');
             console.log(self.playlist);
             self.$apply()
-            // Toast.clear()
           }
         }  
       });
