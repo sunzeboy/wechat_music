@@ -1,0 +1,63 @@
+<style lang="less">
+    .music-type-btn{
+      margin-left:5%;
+      margin-top:5px;
+      margin-bottom: 15px;
+      width: 42%;
+    }
+    
+</style>
+
+<template>
+    <block wx:for-items="{{musicTypes}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+        <van-button custom-class="music-type-btn" @tap='selectMusicType({{item}})' type="primary">{{item.title}}</van-button>
+    </block>
+    <van-toast id="van-toast" />
+    
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import * as api from '../api/api.js'
+  import Toast from '../styles/vant/toast/toast';
+
+  export default class Music_Type_Select extends wepy.page {
+    config = {
+      navigationBarTitleText: '歌曲类型选择',
+      usingComponents: {
+        'van-cell': '/styles/vant/cell/index',
+        "van-button": "/styles/vant/button/index",
+        "van-toast": "/styles/vant/toast/index"
+      }
+    }
+    components = {
+
+    }
+
+
+    data = {
+        musicTypes:[],
+    }
+
+    computed = {
+      
+    }
+
+    methods = {
+      selectMusicType(item) {
+        this.actionSheetShow = false
+        wepy.navigateTo({
+          url: '/pages/music_select_list?musiclist='+ encodeURIComponent(JSON.stringify(item))
+        })
+      },
+    }
+
+    events = {
+      
+    }
+    
+    onLoad(options) {
+      this.musicTypes = JSON.parse(decodeURIComponent(options.musicTypes));
+    }
+  }
+</script>

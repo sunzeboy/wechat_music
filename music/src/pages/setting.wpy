@@ -5,11 +5,11 @@
 <template>
     <van-card
     title="昵称：{{nickname}}"
-    thumb="/resource/head.jpg"
+    thumb="{{thumbUrl}}"
     />
     <van-cell title="个人信息" bind:click='click(1)' is-link />
-    <van-cell title="修改密码" bind:click='click(2)' is-link />
-    <van-cell title="个人画像" is-link />
+    <!-- <van-cell title="修改密码" bind:click='click(2)' is-link /> -->
+    <van-cell title="我的点播" bind:click='click(3)' is-link />
 </template>
 
 <script>
@@ -31,13 +31,12 @@
 
 
     data = {
-      
+      thumbUrl:'',
+      nickname:''
     }
 
     computed = {
-      nickname(){
-        return this.$parent.globalData.businessData.userInfo.nickname
-      }
+
     }
 
     methods = {
@@ -54,6 +53,12 @@
               url: '/pages/webview?url='+ encodeURIComponent('https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=webchangepasswd')
           })
         }
+        else if (params == '3')
+        {
+          wepy.navigateTo({
+              url: '/pages/dian_music_list'
+          })
+        }
       }
     }
 
@@ -61,8 +66,38 @@
       
     }
 
+    fetchData() {
+      let self = this
+      let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=index&p=json'
+      wepy.request({  
+          url: url,  
+          header: {
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+          },
+          data: {},  
+          method: 'GET',   
+          success: function(res){ 
+            console.log(res);
+            self.$parent.globalData.businessData = res.data
+            self.thumbUrl = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_head&sid='+self.$parent.globalData.businessData.userInfo.sid+'.png'
+            self.nickname = self.$parent.globalData.businessData.userInfo.nickname
+            self.$apply()
+          }  
+      });
+    }
+
     onLoad() {
       
+    }
+
+    onShow(){
+      // debugger;
+      this.thumbUrl = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_head&sid='+this.$parent.globalData.businessData.userInfo.sid+'.png'
+      this.nickname = this.$parent.globalData.businessData.userInfo.nickname
+      this.fetchData()
+    }
+    onHide(){
+      this.thumbUrl = ''
     }
   }
 </script>

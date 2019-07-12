@@ -30,7 +30,6 @@
     }
 
     computed = {
-      
     }
 
     methods = {
@@ -50,7 +49,7 @@
     }
 
     onLoad(options) {
-      this.url = decodeURIComponent(options.url);
+      this.url = decodeURIComponent(options.url)+'&openid='+this.$parent.globalData.businessData.userInfo.openid;
     }
 
   }

@@ -48,8 +48,8 @@
 
     onLoad() {
       wepy.navigateTo({
-        url: '/pages/webview'
-    })
+          url: '/pages/webview'
+      })
     }
   }
 </script>

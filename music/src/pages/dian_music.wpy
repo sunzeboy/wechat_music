@@ -1,43 +1,17 @@
 <style lang="less">
-    .section{
-        text-align: center;
-    }
-    .selected{
-      background-color:green !important;
-    }
-    .normal{
-      background-color:gray !important;
-    }
     .sms-checkbox{
       padding-left:15px;
       padding-bottom: 10px;
     }
-    .music-type-btn{
-      margin-left:5%;
-      margin-top:5px;
-      margin-bottom: 15px;
-      width: 40%;
+    .diange-btn{
+      margin-left: 5%;
+      margin-top: 5%;
+      width: 90% !important;
     }
 </style>
 
 <template>
-    <van-cell-group>
-      <van-cell title="请选择日期" bind:click="onDatePickerFocus" value="{{ topDateDesc }}" />
-    </van-cell-group>
-    <block wx:for-items="{{times}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-        <van-cell class="section" custom-class="{{item.isfree ? 'selected':'normal'}}" title="{{item.timedesc}}" size="large" >
-          <van-icon wx:if="{{item.isfree}}" slot="right-icon" name="{{'music-o'}}" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap="dianMusic({{item}})"/>
-        </van-cell>
-    </block>
-    <van-dialog
-    title="点歌"
-    use-slot
-    show="{{ isDialogShow }}"
-    show-cancel-button
-    bind:close="onDialogClose(1)"
-    bind:confirm="addOrderPlayList"
-    async-close=true
-    >
+
     <van-cell-group>
       <van-field
         value="{{ selectedMusicName }}"
@@ -58,34 +32,12 @@
         border="{{ false }}"
         bind:change="typePhone"
       />
-      <van-checkbox value="{{ isNeedSMS }}" custom-class="sms-checkbox" bind:change="onSMSChange">短信通知</van-checkbox>
+      <van-checkbox value="{{ isNeedSMS }}" custom-class="sms-checkbox" checked-color="#FB5A26" bind:change="onSMSChange">短信通知</van-checkbox>
         <van-cell title="请选择通知时间" bind:click="typeNotifyTime" value="{{ notifyTimeDesc }}" />
       <p style="color: red;">点播歌曲需要花费10点积分</p>
     </van-cell-group>
-    </van-dialog>
-
-    <!-- <van-action-sheet
-      show="{{ actionSheetShow }}"
-      actions="{{ actionSheetDatas }}"
-      cancel-text="取消"
-      bind:select="onActionSheetSelect"
-      z-index=100000
-      close-on-click-overlay=true
-      bind:cancel="onCancelActionSheet"
-    /> -->
-    <van-dialog
-      title="选择歌曲类型"
-      use-slot
-      show="{{ actionSheetShow }}"
-      show-cancel-button
-      bind:close="onDialogClose"
-      bind:confirm="addOrderPlayList"
-      async-close=true
-    >
-      <block wx:for-items="{{actionSheetDatas}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-          <van-button custom-class="music-type-btn" @tap='selectMusicType({{item}})' type="primary">{{item.title}}</van-button>
-      </block>
-    </van-dialog>
+    
+    <van-button custom-class='diange-btn' @tap='diange()' size='large' type="primary">点歌</van-button>
 
     <van-popup
       show="{{ isTimePickerShow1 }}"
@@ -133,9 +85,9 @@
   import Toast from '../styles/vant/toast/toast';
 
 
-  export default class Shop_Dian_Music extends wepy.page {
+  export default class Dian_Music extends wepy.page {
     config = {
-      navigationBarTitleText: '店铺点歌',
+      navigationBarTitleText: '点歌',
       component: true,
       usingComponents: {
         'van-cell': '/styles/vant/cell/index',
@@ -176,51 +128,8 @@
       daytick:'',
       phone:'',
       musicTypeList:[
-        {
-          'title':'流行1',
-        },
-        {
-          'title':'流行2',
-        },
-        {
-          'title':'流行3',
-        },
-        {
-          'title':'流行4',
-        },
-        {
-          'title':'流行5',
-        },
-        {
-          'title':'流行6',
-        },
-        {
-          'title':'流行7',
-        },
-        {
-          'title':'流行8',
-        },
-        {
-          'title':'流行9',
-        },
       ],
       actionSheetDatas: [
-        {
-          name: '歌曲1',
-          subname: '歌手：111',
-        },
-        {
-          name: '歌曲2',
-          subname: '歌手：222',
-        },
-        {
-          name: '歌曲3',
-          subname: '歌手：333',
-        },
-        {
-          name: '歌曲4',
-          subname: '歌手：444',
-        }
       ],
       
     }
@@ -260,6 +169,9 @@
     }
 
     methods = {
+      diange(){
+        this.custom_orderplay()
+      },
       selectMusicType(item) {
         this.actionSheetShow = false
         wepy.navigateTo({
@@ -279,10 +191,7 @@
       dianMusic(item) {
         console.log(item);
         this.daytick = item.daytick
-        // this.isDialogShow = true
-        wepy.navigateTo({
-          url:'/pages/dian_music?daytick='+item.daytick
-        })
+        this.isDialogShow = true
       },
       onDialogClose(type) {
         if (type == '1') 
@@ -429,8 +338,8 @@
         this.filesid = this.$parent.globalData.dian_music.sid
       }
     }
-    onLoad() {
-      
+    onLoad(options) {
+      this.daytick = options.daytick
     }
   }
 </script>

@@ -27,7 +27,7 @@
             </van-swipe-cell>
         </block>
 
-        <van-button size="large" @tap="add" >+点歌</van-button>
+        <!-- <van-button size="large" @tap="add" >+点歌</van-button> -->
     </view>
     
     <van-dialog id="van-dialog" />

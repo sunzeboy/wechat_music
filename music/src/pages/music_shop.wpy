@@ -56,7 +56,7 @@
         if (!array) return;
         array.forEach(element => {
           // element.timeDesc = utils.timeDesc(element.lasthit)
-          element.timeDesc = utils.timeDesc()
+          element.timeDesc = utils.timeDesc(parseInt(element.lasthit)*1000)
         });
         console.log(array);
         return array

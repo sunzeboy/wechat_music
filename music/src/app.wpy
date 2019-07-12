@@ -33,6 +33,8 @@ export default class extends wepy.app {
       'pages/music_shop',
       'pages/dian_music_list',
       'pages/shop_dian_music',
+      'pages/music_type_select',
+      'pages/dian_music',
       'pages/music_select_list'
     ],
     window: {
@@ -53,13 +55,13 @@ export default class extends wepy.app {
         text: "当前歌单"
       }, {
         pagePath: "pages/my_music_list",
-        iconPath: "resource/list.png",
-        selectedIconPath: "resource/list_selected.png",
+        iconPath: "resource/gedan.png",
+        selectedIconPath: "resource/gedan_selected.png",
         text: "我的歌单"
       }, {
         pagePath: "pages/music_shop",
-        iconPath: "resource/list.png",
-        selectedIconPath: "resource/list_selected.png",
+        iconPath: "resource/dianpu.png",
+        selectedIconPath: "resource/dianpu_selected.png",
         text: "店堂音乐"
       }, {
         pagePath: "pages/setting",
