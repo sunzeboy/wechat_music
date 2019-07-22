@@ -3,7 +3,7 @@
         text-align: center;
     }
     .selected{
-      background-color:green !important;
+      background-color:white !important;
     }
     .normal{
       background-color:gray !important;
@@ -26,7 +26,7 @@
     </van-cell-group>
     <block wx:for-items="{{times}}" wx:for-index="index" wx:key="index" wx:for-item="item">
         <van-cell class="section" custom-class="{{item.isfree ? 'selected':'normal'}}" title="{{item.timedesc}}" size="large" >
-          <van-icon wx:if="{{item.isfree}}" slot="right-icon" name="{{'music-o'}}" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap="dianMusic({{item}})"/>
+          <van-icon  slot="right-icon" name="{{'music-o'}}" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap="dianMusic({{item}})"/>
         </van-cell>
     </block>
     <van-dialog
@@ -278,6 +278,7 @@
       },
       dianMusic(item) {
         console.log(item);
+        if (item.isfree == 0) return
         this.daytick = item.daytick
         // this.isDialogShow = true
         wepy.navigateTo({

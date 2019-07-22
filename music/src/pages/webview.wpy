@@ -50,6 +50,7 @@
 
     onLoad(options) {
       this.url = decodeURIComponent(options.url)+'&openid='+this.$parent.globalData.businessData.userInfo.openid;
+      // this.url = 'http://medlinkfamily.cn/sysex/index.php?m=wechat&c=interfaces&a=points'
     }
 
   }

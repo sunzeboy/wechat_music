@@ -2,21 +2,27 @@
     .section{
         text-align: center;
     }
-    
+    .label-widening{
+      width: 99%;
+    }
 </style>
 
 <template>
-    <image style="width: 100%; height: 200px; background-color: #eeeeee;" src="{{'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_shop_img&sid='+shopsid}}" @tap="jumpToWeb()"></image>
+    <image style="width: 100%; height: {{screenHeight*0.5}}px; background-color: #eeeeee;" src="{{'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_shop_img&sid='+shopsid}}" @tap="jumpToWeb()"></image>
     <van-cell title="{{shopInfo.name}} 当前的店堂音乐" class="section">
-        <van-icon slot="right-icon" name="todo-list-o" class="custom-icon" color="#FB5A26" size="20px" @tap="dianMusic"/>
-        <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#FB5A26" size="20px" style="margin-left:25px;" @tap="playMusic"/>
+        <!-- <van-icon slot="right-icon" name="todo-list-o" class="custom-icon" color="#FB5A26" size="20px" @tap="dianMusic"/>
+        <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#FB5A26" size="20px" style="margin-left:25px;" @tap="playMusic"/> -->
     </van-cell>
+    <van-tabs type="card" @click="selectAct">
+      <van-tab title="点歌" ></van-tab>
+      <van-tab title="播放" ></van-tab>
+    </van-tabs>
     <block wx:for-items="{{playlist.sections}}" wx:for-index="sec" wx:key="sec" wx:for-item="section">
       <van-cell title="{{section.title}}" class="section">
       </van-cell>
       <block wx:for-items="{{section.items}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-          <van-cell title="{{item.title}}" size="large" value="歌手：{{item.artist}}" label="专辑：{{item.album}}" >
-            <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap="like({{item}},{{sec}},{{index}})"/>
+          <van-cell title="{{item.title}}" size="large" label-class="label-widening" label="歌手：{{item.artist}} 专辑：{{item.album}}" @click="playSingleMusic({{item}})">
+            <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap.stop="like({{item}},{{sec}},{{index}})"/>
         </van-cell>
       </block>
     </block>
@@ -35,6 +41,8 @@
       usingComponents: {
         'van-cell': '/styles/vant/cell/index',
         "van-icon": "/styles/vant/icon/index",
+        'van-tabs': '/styles/vant/tabs/index',
+        'van-tab': '/styles/vant/tab/index',
         "van-toast": "/styles/vant/toast/index"
       }
     }
@@ -47,6 +55,7 @@
         playlist:[],
         favorites:[],
         shopInfo:{},
+        screenHeight:800,
         shopsid:''
     }
 
@@ -57,28 +66,31 @@
     }
 
     methods = {
+      playSingleMusic(item){
+        var httpUrl = "https://web.sound-genie.com/upload/music/"
+        let fileid = item.fileid
+        let a = fileid.substring(0,2)
+        let b = fileid.substring(2,4)
+        httpUrl = httpUrl + a + '/' + b + '/' + fileid + '.mp3'
+        this.$parent.globalData.backgroundAudioManager.title = item.title
+        this.$parent.globalData.backgroundAudioManager.src = httpUrl
+        this.$parent.globalData.backgroundAudioManager.singer = item.artist
+      },
+      selectAct(event){
+        if (event.detail.index === 0) 
+        {
+          this.dianMusic()
+        } 
+        else 
+        {
+          this.playMusic()
+        }
+        
+      },
       jumpToWeb(){
         wepy.navigateTo({
           url: '/pages/webview?url='+ encodeURIComponent('https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=webshopindex&shopsid='+this.shopsid)
         })
-      },
-      dianMusic () {
-        wepy.navigateTo({
-          // url: '/pages/webview?thirdUrl='+'http://www.baidu.com'
-          url: '/pages/shop_dian_music'
-        })
-
-      },
-      playMusic () {
-        this.$parent.globalData.cur_plist_list_sid = -1
-        this.$parent.globalData.cur_playlist = this.playlist
-        console.log(this.$parent.globalData.cur_playlist);
-        this.$parent.globalData.playlist_needRefresh = true
-        this.$parent.globalData.playlist = this.playlist
-        this.$parent.$pages['/pages/music_list'].data.playlist = this.playlist
-        this.$parent.globalData.custom_play()
-        Toast('设置为播放列表成功！')
-        
       },
       like(item,sec,row){
         let self = this
@@ -107,6 +119,24 @@
     events = {
       
     }
+    dianMusic () {
+        wepy.navigateTo({
+          // url: '/pages/webview?thirdUrl='+'http://www.baidu.com'
+          url: '/pages/shop_dian_music'
+        })
+
+      }
+      playMusic () {
+        this.$parent.globalData.cur_plist_list_sid = -1
+        this.$parent.globalData.cur_playlist = this.playlist
+        console.log(this.$parent.globalData.cur_playlist);
+        this.$parent.globalData.playlist_needRefresh = true
+        this.$parent.globalData.playlist = this.playlist
+        this.$parent.$pages['/pages/music_list'].data.playlist = this.playlist
+        this.$parent.globalData.custom_play()
+        Toast('设置为播放列表成功！')
+        
+      }
     custom_refresh_fav(options){
       let self = this;
       console.log('+_+_+_+_+_+_+_+_+');
@@ -192,6 +222,15 @@
     onLoad(options) {
       this.shopsid = options.shopsid
       this.custom_refresh_fav(options)
+      let self = this;
+      wepy.getSystemInfo({
+          success(res){
+              // self.screenHeight = (res.windowHeight-44)/(res.windowWidth/750)
+              self.screenHeight = res.windowHeight
+              console.log(self.screenHeight);
+              self.$apply()
+          }
+      })
     }
   }
 </script>

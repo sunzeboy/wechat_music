@@ -17,6 +17,15 @@
 .weui-footer_fixed-bottom {
   bottom: 0%;
 }
+.image-border{
+  width: 99%;
+  border-style: solid;
+  border-width: 1px;
+  border-color: grey;
+}
+.label-widening{
+  width: 99%;
+}
 </style>
 
 <template>
@@ -38,7 +47,7 @@
                 </van-collapse> -->
                 <block wx:for-items="{{playlists}}" wx:for-index="index" wx:key="index" wx:for-item="item">
                     <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}"  async-close bind:close="onCellClose(1,{{item}})">
-                        <van-cell title="{{item.title}}"  value="{{item.cnt}}首" label="备注：{{item.comment}}" class="section">
+                        <van-cell title="{{item.title}}"  value="{{item.cnt}}首"  label="备注：{{item.comment}}" class="section">
                             <van-icon slot="icon" name="https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_gedan_img&sid={{item.sid}}" style="margin-right:15px;" class="custom-icon"  size="40px"/>
                             <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#FB5A26" size="20px" style="margin-left:15px;" @tap="playAndAddToPlayList({{item.sid}})"/>
                             <van-icon slot="right-icon" name="edit" class="custom-icon" color="#FB5A26" size="20px" style="margin-left:25px;" @tap="edit({{item}})"/>
@@ -65,7 +74,7 @@
                             </van-checkbox>
                         </view>
                         <van-cell-group>
-                            <van-cell value="歌手：{{item.artist}}" size="large"  label="专辑：{{item.album}}">
+                            <van-cell size="large" label-class="label-widening" label="歌手：{{item.artist}} 专辑：{{item.album}}">
                             <view slot="title">
                             <view class="van-cell-text">{{item.title}}</view>
                             <van-tag wx:if="{{index == selectedIndex}}" type="danger">播放中...</van-tag>
@@ -113,7 +122,7 @@
     bind:confirm="addPlayList"
     async-close=true
     >
-    <image src="{{img_url}}" mode="aspectFit" @tap="chooseImg"/>
+    <image class="image-border" src="{{img_url}}" mode="aspectFit" @tap="chooseImg"/>
     <van-cell-group>
     <van-field
         value="{{ music_list_name }}"
@@ -220,6 +229,17 @@ export default class MyMusic_list extends wepy.page {
   };
 
   methods = {
+    playSingleMusic(item){
+      console.log(item);
+      var httpUrl = "https://web.sound-genie.com/upload/music/"
+      let fileid = item.fileid
+      let a = fileid.substring(0,2)
+      let b = fileid.substring(2,4)
+      httpUrl = httpUrl + a + '/' + b + '/' + fileid + '.mp3'
+      this.$parent.globalData.backgroundAudioManager.title = item.title
+      this.$parent.globalData.backgroundAudioManager.src = httpUrl
+      this.$parent.globalData.backgroundAudioManager.singer = item.artist
+    },
     addToPlayList(){
       var self = this
       var tempArray = []
@@ -289,10 +309,10 @@ export default class MyMusic_list extends wepy.page {
         Toast('请输入歌单名称');
         return
       }
-      if (this.comment_name=='') {
-        Toast('请输入备注名称');
-        return
-      }
+      // if (this.comment_name=='') {
+      //   Toast('请输入备注名称');
+      //   return
+      // }
       if (this.img_base64=='' && this.img_url == '') {
         Toast('请选择图片');
         return

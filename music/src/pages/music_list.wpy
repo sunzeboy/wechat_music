@@ -133,12 +133,15 @@
 .normal{
 
 }
+.label-widening{
+  width: 99%;
+}
 </style>
 
 <template>
         <scroll-view scroll-y style="height: {{listHeight}}px;">
           <block wx:if="{{ type1Show }}" wx:for-items="{{playlist}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-            <van-cell title="{{item.title}}" custom-class="{{index == selectedIndex ? 'selected':'normal'}}" value="歌手：{{item.artist}}" size="large"  label="专辑：{{item.album}}" @tap="select1({{index}})" >
+            <van-cell title="{{item.title}}" custom-class="{{index == selectedIndex ? 'selected':'normal'}}"  size="large" label-class="label-widening"  label="歌手：{{item.artist}} 专辑：{{item.album}}" @tap="select1({{index}})" >
               <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap.stop="like1({{item}},{{index}})"/>
             </van-cell>
           </block>
@@ -146,7 +149,7 @@
             <van-cell title="{{section.title}}" class="section">
             </van-cell>
             <block wx:for-items="{{section.items}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-              <van-cell title="{{item.title}}" custom-class="{{(index == sel_row && sec == sel_sec) ? 'selected':'normal'}}" size="large" value="歌手：{{item.artist}}" label="专辑：{{item.album}}" @tap="select2({{sec}},{{index}})" >
+              <van-cell title="{{item.title}}" custom-class="{{(index == sel_row && sec == sel_sec) ? 'selected':'normal'}}" size="large" label-class="label-widening" label="歌手：{{item.artist}} 专辑：{{item.album}}" @tap="select2({{sec}},{{index}})" >
                 <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap.stop="like2({{item}},{{sec}},{{index}})"/>
               </van-cell>
             </block>
