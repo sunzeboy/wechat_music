@@ -122,7 +122,9 @@
     bind:confirm="addPlayList"
     async-close=true
     >
-    <image class="image-border" src="{{img_url}}" mode="aspectFit" @tap="chooseImg"/>
+    <div>
+      <image class="image-border" src="{{img_url}}" mode="aspectFit" @tap="chooseImg"/>
+    </div>
     <van-cell-group>
     <van-field
         value="{{ music_list_name }}"
@@ -224,7 +226,7 @@ export default class MyMusic_list extends wepy.page {
 
   computed = {
     img_url(){
-      return this.music_list_url ? this.music_list_url : ""
+      return this.music_list_url ? this.music_list_url : "/resource/list-add.png"
     }
   };
 
@@ -313,7 +315,7 @@ export default class MyMusic_list extends wepy.page {
       //   Toast('请输入备注名称');
       //   return
       // }
-      if (this.img_base64=='' && this.img_url == '') {
+      if (this.img_base64=='' && this.img_url == '/resource/list-add.png') {
         Toast('请选择图片');
         return
       }

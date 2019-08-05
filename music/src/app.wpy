@@ -78,6 +78,7 @@ export default class extends wepy.app {
     sel_sec:0,
     sel_row:0,
     selectedIndex:0,
+    play_mode:0,
     backgroundAudioManager:Object,
     playlist_needRefresh:false,
     cur_plist_list_sid:0,
@@ -98,10 +99,21 @@ export default class extends wepy.app {
     let self = this
     this.backgroundAudioManager = wx.getBackgroundAudioManager()
     this.backgroundAudioManager.onEnded(()=>{
-      wepy.showToast({
-        title: '播放结束',
-      });
-      this.custom_next()
+      console.log('this.play_mode:'+this.play_mode);
+      if (this.play_mode == 0) 
+      {
+        this.custom_next()
+      }
+      else if (this.play_mode == 1)
+      {
+        this.custom_play()
+      }
+      else
+      {
+        this.selectedIndex = Math.floor(Math.random() * this.playlistCount())
+        wepy.$instance.$pages['/pages/music_list'].selectedIndex = this.selectedIndex
+        this.custom_play()
+      }
     })
     this.backgroundAudioManager.onNext(()=>{
       wepy.showToast({
@@ -255,8 +267,9 @@ export default class extends wepy.app {
         {
             this.selectedIndex  = this.selectedIndex + 1
         }
-        console.log('this.selectedIndex:'+this.selectedIndex);
-        
+        // console.log('this.selectedIndex:'+this.selectedIndex);
+        // console.log(wepy.$instance.$pages);
+        wepy.$instance.$pages['/pages/music_list'].selectedIndex = this.selectedIndex
         this.custom_play()
     },
     
@@ -269,6 +282,7 @@ export default class extends wepy.app {
       {
           this.selectedIndex = this.selectedIndex - 1
       }
+      wepy.$instance.$pages['/pages/music_list'].selectedIndex = this.selectedIndex
       this.custom_play()
     },
     playlistCount () {

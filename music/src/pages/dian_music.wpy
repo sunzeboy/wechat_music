@@ -292,7 +292,7 @@
       if (this.phone.length != 11) 
       {
         // this.errorMessagePhone = '手机号不合法'
-        Toast('手机号不合法!')
+        Toast('请输入有效手机号码!')
         return;
       }
 

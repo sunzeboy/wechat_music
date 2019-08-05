@@ -13,9 +13,9 @@
         <!-- <van-icon slot="right-icon" name="todo-list-o" class="custom-icon" color="#FB5A26" size="20px" @tap="dianMusic"/>
         <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#FB5A26" size="20px" style="margin-left:25px;" @tap="playMusic"/> -->
     </van-cell>
-    <van-tabs type="card" @click="selectAct">
-      <van-tab title="点歌" ></van-tab>
-      <van-tab title="播放" ></van-tab>
+    <van-tabs type="card" color='#FB5A26' active=-1  @click="selectAct">
+      <van-tab title="点歌歌曲" ></van-tab>
+      <van-tab title="一键播放" ></van-tab>
     </van-tabs>
     <block wx:for-items="{{playlist.sections}}" wx:for-index="sec" wx:key="sec" wx:for-item="section">
       <van-cell title="{{section.title}}" class="section">
@@ -192,7 +192,7 @@
             }
             else
             {
-              res.data.playlist.sections = res.data.playlist.sections.concat(res.data.addlist.sections)
+              // res.data.playlist.sections = res.data.playlist.sections.concat(res.data.addlist.sections)
             }
             self.playlist = res.data.playlist
             let json = JSON.stringify(self.favorites)

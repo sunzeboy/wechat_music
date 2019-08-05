@@ -128,7 +128,7 @@
   background-color:#13227a;
 }
 .selected{
-  background-color:rgb(254, 91, 43) !important;
+  color:rgb(254, 91, 43) !important;
 }
 .normal{
 
@@ -139,9 +139,15 @@
 </style>
 
 <template>
+        <div wx:if="{{playlist.length == 0}}">
+          <van-notice-bar
+            text="您还没有点歌，快去试试吧"
+          />
+        </div>
+        
         <scroll-view scroll-y style="height: {{listHeight}}px;">
           <block wx:if="{{ type1Show }}" wx:for-items="{{playlist}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-            <van-cell title="{{item.title}}" custom-class="{{index == selectedIndex ? 'selected':'normal'}}"  size="large" label-class="label-widening"  label="歌手：{{item.artist}} 专辑：{{item.album}}" @tap="select1({{index}})" >
+            <van-cell title="{{item.title}}" title-class="{{index == selectedIndex ? 'selected':'normal'}}"  size="large" label-class="label-widening" label="歌手：{{item.artist}} 专辑：{{item.album}}" @tap="select1({{index}})" >
               <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap.stop="like1({{item}},{{index}})"/>
             </van-cell>
           </block>
@@ -155,7 +161,6 @@
             </block>
           </block>
         </scroll-view>
-        
 
       <view class="audio weui-footer weui-footer_fixed-bottom">
         <text>当前音乐:{{selectedName}}</text>
@@ -172,9 +177,11 @@
             <text class="total-process">{{total_process}}</text>
         </view>
         <view class="icon-list ">
+            <image @tap="changeLoopMode" mode="widthFix" src="{{play_mode_icon}}" class="audio-icon"></image>
             <image @tap="previous" mode="widthFix" src="{{is_first_page?'/resource/audio_prev_no.png':'/resource/audio_prev.png'}}" class="audio-icon"></image>
             <image mode="widthFix" src="{{is_play == false? '/resource/audio_play.png': '/resource/audio_paused.png'}}" class="audio-icon audio-play" @tap="audio_play"></image>
             <image @tap="next" mode="widthFix" src="{{is_last_page?'/resource/audio_next_no.png':'/resource/audio_next.png'}}" class="audio-icon"></image>
+            <image @tap="" mode="widthFix" src="" class="audio-icon"></image>
         </view>
     </view>
     <van-toast id="van-toast" />
@@ -191,6 +198,7 @@
         'van-cell': '/styles/vant/cell/index',
         'van-tag': '/styles/vant/tag/index',
         "van-icon": "/styles/vant/icon/index",
+        "van-notice-bar": "/styles/vant/notice-bar/index",
         "van-toast": "/styles/vant/toast/index"
       }
     }
@@ -205,6 +213,7 @@
       sel_row:0,
       backgroundAudioManager:Object,
       selectedIndex:0,
+      play_mode:0,
       playlist:[],
       duration:'',
       currentTime:'',
@@ -212,6 +221,20 @@
     }
 
     computed = {
+      play_mode_icon() {
+        if (this.play_mode == 0) 
+        {
+          return '/resource/shunxu.png'
+        } 
+        else if (this.play_mode == 1) 
+        {
+          return '/resource/repeat.png'
+        }
+        else
+        {
+          return '/resource/suiji.png'
+        }
+      },
       cur_sid(){
         if (this.playlist.sections) 
         {
@@ -286,6 +309,26 @@
     }
 
     methods = {
+      changeLoopMode(){
+        this.play_mode ++
+        if (this.play_mode == 3) 
+        {
+          this.play_mode = 0  
+        }
+        if (this.play_mode == 0) 
+        {
+          Toast('顺序播放');
+        } 
+        else if (this.play_mode == 1) 
+        {
+          Toast('单曲循环');
+        }
+        else
+        {
+          Toast('随机播放');
+        }
+        this.$parent.globalData.play_mode = this.play_mode
+      },
       like1(item,index){
         let self = this
         Toast.loading({
@@ -374,7 +417,21 @@
         this.custom_next()
       },
       onEnded () {
+        debugger;
+        if (this.play_mode == 0) 
+        {
           this.custom_next()
+        }
+        else if (this.play_mode == 1)
+        {
+          this.custom_play()
+        }
+        else
+        {
+          this.selectedIndex = Math.floor(Math.random() * this.playlist.length)
+          this.custom_play()
+        }
+          // this.custom_next()
       },
       audio_play () {
         if (this.is_play) 
@@ -540,7 +597,8 @@
         {
             this.selectedIndex  = this.selectedIndex + 1
         }
-        console.log('this.selectedIndex:'+this.selectedIndex);
+        // console.log('this.selectedIndex:'+this.selectedIndex);
+        // console.log(wepy.$instance.$pages['/pages/music_list']);
         this.$parent.globalData.businessData.selectedIndex = this.selectedIndex
         this.custom_play()
     }
