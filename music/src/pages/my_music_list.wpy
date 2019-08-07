@@ -32,19 +32,6 @@
     <van-tabs color="#FB5A26" swipeable=true>
         <van-tab title="我的歌单">
             <view style="width: 100%;height: {{screenHeight}}rpx;background-color: #fff;">
-                <!-- <van-collapse value="{{ activeNames }}" bind:change="onChange" accordion>
-                    <block wx:for-items="{{music_list}}" wx:for-index="index" wx:key="index" wx:for-item="section">
-                        <van-collapse-item name="{{index}}" value="{{section.list.length}}首" is-link clickable="true">
-                            <view slot="title">{{index+1 + '.' + section.section_name}}
-                                <van-icon size="20px" custom-style="padding:10px;" name="play-circle-o" @tap.stop="playAndAddToPlayList"/>
-                                <van-icon size="20px" name="edit" @tap.stop="edit"/>
-                                </view>
-                            <block wx:for-items="{{section.list}}" wx:for-index="i"  wx:key="i" wx:for-item="row">
-                                <van-cell title="{{row.name}}" value="歌手：{{row.author}}" size="large" label="歌手：{{row.author}}" />
-                            </block>
-                        </van-collapse-item>
-                    </block>
-                </van-collapse> -->
                 <block wx:for-items="{{playlists}}" wx:for-index="index" wx:key="index" wx:for-item="item">
                     <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}"  async-close bind:close="onCellClose(1,{{item}})">
                         <van-cell title="{{item.title}}"  value="{{item.cnt}}首"  label="备注：{{item.comment}}" class="section">
@@ -74,7 +61,7 @@
                             </van-checkbox>
                         </view>
                         <van-cell-group>
-                            <van-cell size="large" label-class="label-widening" label="歌手：{{item.artist}} 专辑：{{item.album}}">
+                            <van-cell size="large" label-class="label-widening" >
                             <view slot="title">
                             <view class="van-cell-text">{{item.title}}</view>
                             <van-tag wx:if="{{index == selectedIndex}}" type="danger">播放中...</van-tag>

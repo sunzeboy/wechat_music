@@ -21,7 +21,7 @@
       <van-cell title="{{section.title}}" class="section">
       </van-cell>
       <block wx:for-items="{{section.items}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-          <van-cell title="{{item.title}}" size="large" label-class="label-widening" label="歌手：{{item.artist}} 专辑：{{item.album}}" @click="playSingleMusic({{item}})">
+          <van-cell title="{{item.title}}" size="large" label-class="label-widening" @click="playSingleMusic({{item}})">
             <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap.stop="like({{item}},{{sec}},{{index}})"/>
         </van-cell>
       </block>

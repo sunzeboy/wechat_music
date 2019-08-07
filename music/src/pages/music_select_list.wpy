@@ -4,8 +4,8 @@
 
 <template>
     <block wx:for-items="{{musiclist.items}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-      <van-cell title="{{item.title}}" custom-class="{{index == selectedIndex ? 'selected':'normal'}}" value="歌手：{{item.artist}}" size="large"  label="专辑：{{item.album}}" @tap="selectMusic({{item}})" >
-        <!-- <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap.stop="like1({{item}},{{index}})"/> -->
+      <van-cell title="{{item.title}}" custom-class="{{index == selectedIndex ? 'selected':'normal'}}"  size="large"   @tap="selectMusic({{item}})" >
+        <van-icon slot="right-icon" name="play" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap.stop="playSingleMusic({{item}})"/>
       </van-cell>
     </block>
 
@@ -53,6 +53,16 @@
     
 
     methods = {
+      playSingleMusic(item){
+        var httpUrl = "https://web.sound-genie.com/upload/music/"
+        let fileid = item.fileid
+        let a = fileid.substring(0,2)
+        let b = fileid.substring(2,4)
+        httpUrl = httpUrl + a + '/' + b + '/' + fileid + '.mp3'
+        this.$parent.globalData.backgroundAudioManager.title = item.title
+        this.$parent.globalData.backgroundAudioManager.src = httpUrl
+        this.$parent.globalData.backgroundAudioManager.singer = item.artist
+      },
       selectMusic(item){
         this.$parent.globalData.dian_music = item
         wepy.navigateBack({

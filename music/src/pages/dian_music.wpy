@@ -24,16 +24,20 @@
       >
         <van-button slot="button" size="small" type="primary" @tap="selectMusic">选择歌曲</van-button>
       </van-field>
-      <van-field
-        value="{{ phone }}"
-        label="手机号"
-        placeholder="请输入手机号"
-        error-message="{{errorMessagePhone}}"
-        border="{{ false }}"
-        bind:change="typePhone"
-      />
+      
       <van-checkbox value="{{ isNeedSMS }}" custom-class="sms-checkbox" checked-color="#FB5A26" bind:change="onSMSChange">短信通知</van-checkbox>
+      <div wx:if="{{ isNeedSMS }}">
+        <van-field
+          value="{{ phone }}"
+          label="手机号"
+          placeholder="请输入手机号"
+          error-message="{{errorMessagePhone}}"
+          border="{{ false }}"
+          bind:change="typePhone"
+        />
         <van-cell title="请选择通知时间" bind:click="typeNotifyTime" value="{{ notifyTimeDesc }}" />
+      </div>
+      
       <p style="color: red;">点播歌曲需要花费10点积分</p>
     </van-cell-group>
     
@@ -289,10 +293,14 @@
         Toast('请选择歌曲！')
         return;
       }
-      if (this.phone.length != 11) 
+      if (this.phone.length != 11 && this.isNeedSMS == true) 
       {
         // this.errorMessagePhone = '手机号不合法'
         Toast('请输入有效手机号码!')
+        return;
+      }
+      if (this.currentDate2 < new Date().getTime() && this.isNeedSMS == true) {
+        Toast('该通知时间无效！')
         return;
       }
 
@@ -316,10 +324,18 @@
         },
         method: 'POST',
         success: function(res) {
-          wepy.navigateBack({
-            delta:1
-          })
-          self.$parent.globalData.dian_music = {}
+          debugger;
+          if (res.data.status == 1) 
+          {
+            wepy.navigateBack({
+              delta:1
+            })
+            self.$parent.globalData.dian_music = {}
+          } 
+          else 
+          {
+            Toast(res.data.message)
+          }
         }
       });
     }
