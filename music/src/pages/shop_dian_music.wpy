@@ -423,6 +423,7 @@
     }
     onShow() {
       this.custom_orderplay_getmusics()
+      this.custom_orderplay_gettimes()
       if (this.$parent.globalData.dian_music) 
       {
         this.selectedMusicName = this.$parent.globalData.dian_music.title

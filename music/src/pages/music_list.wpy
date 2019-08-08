@@ -139,12 +139,6 @@
 </style>
 
 <template>
-        <div wx:if="{{playlist.length == 0}}">
-          <van-notice-bar
-            text="您还没有点歌，快去试试吧"
-          />
-        </div>
-        
         <scroll-view scroll-y style="height: {{listHeight}}px;">
           <block wx:if="{{ type1Show }}" wx:for-items="{{playlist}}" wx:for-index="index" wx:key="index" wx:for-item="item">
             <van-cell title="{{item.title}}" title-class="{{index == selectedIndex ? 'selected':'normal'}}"  size="large" label-class="label-widening" @tap="select1({{index}})" >
@@ -198,7 +192,6 @@
         'van-cell': '/styles/vant/cell/index',
         'van-tag': '/styles/vant/tag/index',
         "van-icon": "/styles/vant/icon/index",
-        "van-notice-bar": "/styles/vant/notice-bar/index",
         "van-toast": "/styles/vant/toast/index"
       }
     }
@@ -690,6 +683,21 @@
       this.backgroundAudioManager.onTimeUpdate(()=>{
         self.duration = self.backgroundAudioManager.duration
         self.currentTime = self.backgroundAudioManager.currentTime
+        self.$apply()
+      })
+      this.backgroundAudioManager.onStop(()=>{
+        console.log('onStop');
+        self.is_play = false
+        self.$apply()
+      })
+      this.backgroundAudioManager.onPause(()=>{
+        console.log('onPause');
+        self.is_play = false
+        self.$apply()
+      })
+      this.backgroundAudioManager.onPlay(()=>{
+        console.log('onPlay');
+        self.is_play = true
         self.$apply()
       })
     }

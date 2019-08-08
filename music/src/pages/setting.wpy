@@ -7,8 +7,8 @@
     title="昵称：{{nickname}}"
     thumb="{{thumbUrl}}"
     />
-    <van-cell title="个人信息" bind:click='click(1)' is-link />
-    <!-- <van-cell title="修改密码" bind:click='click(2)' is-link /> -->
+    <van-cell title="我的积分" bind:click='click(1)' is-link />
+    <van-cell title="个人信息" bind:click='click(2)' is-link />
     <van-cell title="我的点播" bind:click='click(3)' is-link />
 </template>
 
@@ -44,13 +44,13 @@
         if (params == '1') 
         {
           wepy.navigateTo({
-              url: '/pages/webview?url='+ encodeURIComponent('https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=webmyinfo')
+              url: '/pages/webview?url='+ encodeURIComponent('https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=webmypoint')
           })
         }
         else if (params == '2')
         {
           wepy.navigateTo({
-              url: '/pages/webview?url='+ encodeURIComponent('https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=webchangepasswd')
+              url: '/pages/webview?url='+ encodeURIComponent('https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=webmyinfo')
           })
         }
         else if (params == '3')

@@ -5,6 +5,11 @@
 </style>
 
 <template>
+    <div wx:if="{{playlists.length == 0}}">
+      <van-notice-bar
+        text="您还没有点歌，快去试试吧"
+      />
+    </div>
     <view>
         <block wx:for-items="{{playlists}}" wx:for-index="index" wx:key="index" wx:for-item="item">
             <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}"  async-close bind:close="onCellClose({{item}})">
@@ -53,6 +58,7 @@
         'van-field': '/styles/vant/field/index',
         'van-swipe-cell': '/styles/vant/swipe-cell/index',
         'van-dialog': '/styles/vant/dialog/index',
+        "van-notice-bar": "/styles/vant/notice-bar/index",
         "van-toast": "/styles/vant/toast/index"
       }
     }

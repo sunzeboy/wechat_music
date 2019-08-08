@@ -5,6 +5,14 @@
     .label-widening{
       width: 99%;
     }
+    .custom-btn{
+      border:1px solid #FB5A26 !important;
+      color: #FB5A26 !important;
+      height: 30px !important;
+      width: 80% !important;
+      line-height: 30px !important;
+      margin: 10% !important;
+    }
 </style>
 
 <template>
@@ -13,10 +21,18 @@
         <!-- <van-icon slot="right-icon" name="todo-list-o" class="custom-icon" color="#FB5A26" size="20px" @tap="dianMusic"/>
         <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#FB5A26" size="20px" style="margin-left:25px;" @tap="playMusic"/> -->
     </van-cell>
-    <van-tabs type="card" color='#FB5A26' active=-1  @click="selectAct">
+    <!-- <van-tabs type="card" color='#FB5A26' active="{{active}}"  @click="selectAct">
       <van-tab title="点歌歌曲" ></van-tab>
       <van-tab title="一键播放" ></van-tab>
-    </van-tabs>
+    </van-tabs> -->
+    <van-row>
+      <van-col span="12" >
+        <van-button plain size="large" type="primary" custom-class="custom-btn" @click="dianMusic">点歌歌曲</van-button>
+      </van-col>
+      <van-col span="12" >
+        <van-button plain size="large" type="primary" custom-class="custom-btn" @click="playMusic">一键播放</van-button>
+      </van-col>
+    </van-row>
     <block wx:for-items="{{playlist.sections}}" wx:for-index="sec" wx:key="sec" wx:for-item="section">
       <van-cell title="{{section.title}}" class="section">
       </van-cell>
@@ -43,6 +59,9 @@
         "van-icon": "/styles/vant/icon/index",
         'van-tabs': '/styles/vant/tabs/index',
         'van-tab': '/styles/vant/tab/index',
+        "van-row": "/styles/vant/row/index",
+        "van-col": "/styles/vant/col/index",
+        "van-button": "/styles/vant/button/index",
         "van-toast": "/styles/vant/toast/index"
       }
     }
@@ -56,6 +75,7 @@
         favorites:[],
         shopInfo:{},
         screenHeight:800,
+        active:-1,
         shopsid:''
     }
 
@@ -175,6 +195,15 @@
         method: 'GET',   
         success: function(res){ 
           console.log(res);
+          var httpUrl = "https://web.sound-genie.com/upload/music/"
+          let fileid = res.data.fileid
+          let a = fileid.substring(0,2)
+          let b = fileid.substring(2,4)
+          debugger;
+          httpUrl = httpUrl + a + '/' + b + '/' + fileid + '.mp3'
+          self.$parent.globalData.backgroundAudioManager.title = ''
+          self.$parent.globalData.backgroundAudioManager.src = httpUrl
+          self.$parent.globalData.backgroundAudioManager.singer = ''
           var playlist = res.data.playlist
           var addlist = res.data.addlist
           self.shopInfo = res.data.shopInfo
@@ -218,6 +247,11 @@
           }
         }  
       });
+    }
+    onShow() {
+      console.log('this.active'+this.active);
+      this.active = -1
+      this.$apply()
     }
     onLoad(options) {
       this.shopsid = options.shopsid

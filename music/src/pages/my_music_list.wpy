@@ -50,7 +50,7 @@
             <view style="width: 100%;height: {{screenHeight}}rpx;background-color: #fff;">
               <scroll-view scroll-y style="height: {{screenHeight-90}}rpx;">
                 <block wx:for-items="{{favorites}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-                    <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}" left-width="{{ 65 }}" async-close bind:close="onCellClose(2,{{item}})">
+                    <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}" left-width="{{ 65 }}" async-close bind:close="onCellClose(2,{{item}})" bind:click="playSingleMusic({{item}})">
                         <view slot="left" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #fff;" >
                             <van-checkbox
                             style="display: inline-block;"

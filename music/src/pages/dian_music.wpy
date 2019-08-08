@@ -324,7 +324,6 @@
         },
         method: 'POST',
         success: function(res) {
-          debugger;
           if (res.data.status == 1) 
           {
             wepy.navigateBack({
