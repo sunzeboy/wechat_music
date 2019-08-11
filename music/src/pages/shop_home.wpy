@@ -16,7 +16,7 @@
 </style>
 
 <template>
-    <image style="width: 100%; height: {{screenHeight*0.5}}px; background-color: #eeeeee;" src="{{'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_shop_img&sid='+shopsid}}" @tap="jumpToWeb()"></image>
+    <image style="width: 100%;height: {{screenWidth}}px; background-color: #eeeeee;" mode="widthFix" src="{{'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_shop_img&sid='+shopsid}}" @tap="jumpToWeb()"></image>
     <van-cell title="{{shopInfo.name}} 当前的店堂音乐" class="section">
         <!-- <van-icon slot="right-icon" name="todo-list-o" class="custom-icon" color="#FB5A26" size="20px" @tap="dianMusic"/>
         <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#FB5A26" size="20px" style="margin-left:25px;" @tap="playMusic"/> -->
@@ -75,6 +75,7 @@
         favorites:[],
         shopInfo:{},
         screenHeight:800,
+        screenWidth:400,
         active:-1,
         shopsid:''
     }
@@ -199,11 +200,17 @@
           let fileid = res.data.fileid
           let a = fileid.substring(0,2)
           let b = fileid.substring(2,4)
-          debugger;
           httpUrl = httpUrl + a + '/' + b + '/' + fileid + '.mp3'
-          self.$parent.globalData.backgroundAudioManager.title = ''
-          self.$parent.globalData.backgroundAudioManager.src = httpUrl
-          self.$parent.globalData.backgroundAudioManager.singer = ''
+          if (self.$parent.globalData.backgroundAudioManager.src == httpUrl) 
+          {
+            
+          }
+          else
+          {
+            self.$parent.globalData.backgroundAudioManager.title = '未知'
+            self.$parent.globalData.backgroundAudioManager.src = httpUrl
+            self.$parent.globalData.backgroundAudioManager.singer = '未知'
+          }
           var playlist = res.data.playlist
           var addlist = res.data.addlist
           self.shopInfo = res.data.shopInfo
@@ -261,7 +268,8 @@
           success(res){
               // self.screenHeight = (res.windowHeight-44)/(res.windowWidth/750)
               self.screenHeight = res.windowHeight
-              console.log(self.screenHeight);
+              self.screenWidth = res.windowWidth
+              console.log(self.screenWidth);
               self.$apply()
           }
       })
