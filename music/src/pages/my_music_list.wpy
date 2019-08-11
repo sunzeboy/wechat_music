@@ -33,11 +33,11 @@
         <van-tab title="我的歌单">
             <view style="width: 100%;height: {{screenHeight}}rpx;background-color: #fff;">
                 <block wx:for-items="{{playlists}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-                    <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}"  async-close bind:close="onCellClose(1,{{item}})">
+                    <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}"  async-close bind:close="onCellClose(1,{{item}})" bind:click="onCellClick({{item}})">
                         <van-cell title="{{item.title}}"  value="{{item.cnt}}首"  label="备注：{{item.comment}}" class="section">
                             <van-icon slot="icon" name="https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_gedan_img&sid={{item.sid}}" style="margin-right:15px;" class="custom-icon"  size="40px"/>
-                            <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#FB5A26" size="20px" style="margin-left:15px;" @tap="playAndAddToPlayList({{item.sid}})"/>
-                            <van-icon slot="right-icon" name="edit" class="custom-icon" color="#FB5A26" size="20px" style="margin-left:25px;" @tap="edit({{item}})"/>
+                            <van-icon slot="right-icon" name="play-circle-o" class="custom-icon" color="#FB5A26" size="20px" style="margin-left:15px;" @tap.stop="playAndAddToPlayList({{item.sid}})"/>
+                            <van-icon slot="right-icon" name="edit" class="custom-icon" color="#FB5A26" size="20px" style="margin-left:25px;" @tap.stop="edit({{item}})"/>
                         </van-cell>
                         <view slot="right" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #f44;" >删除</view>
                     </van-swipe-cell>
@@ -140,7 +140,7 @@
     show="{{ is2DialogShow }}"
     show-cancel-button
     bind:close="onDialogClose"
-    bind:confirm="addToPlayList"
+    bind:confirm="addToPlayList(1)"
     >
     <van-radio-group value="{{ result }}" bind:change="radioOnChange">
     <van-cell-group >
@@ -156,6 +156,35 @@
         </van-cell>
     </van-cell-group>
     </van-radio-group>
+    </van-dialog>
+    <van-dialog
+      use-slot
+      title="编辑歌单-删除歌曲"
+      show="{{ is3DialogShow }}"
+      show-cancel-button
+      bind:close="onDialogClose"
+      bind:confirm="addToPlayList(3)"
+      async-close=true
+    >
+      <!-- <block wx:for-items="{{gequlist}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+        <van-cell title="{{item.title}}" size="large" label-class="label-widening" @tap="select1({{index}})" >
+          <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap.stop="like1({{item}},{{index}})"/>
+        </van-cell>
+      </block> -->
+      <scroll-view style="height: 250px;" scroll-y>
+        <van-checkbox-group value="{{ checkboxResult }}" bind:change="onCheckboxChange">
+            <van-cell-group >
+              <van-cell
+                wx:for="{{ gequlist }}"
+                wx:key="index"
+                title="{{ item.title }}"
+                data-index="{{ index }}">
+                <van-checkbox catch:tap="noop" @tap.stop="toggle2({{index}})" value="{{ item.isSelected }}" checked-color="#FB5A26" class="checkboxes-{{ index }}" name="{{ index }}" />
+              </van-cell>
+            </van-cell-group>
+        </van-checkbox-group>
+      </scroll-view>
+      
     </van-dialog>
     <van-toast id="van-toast" />
     <van-dialog id="van-dialog" />
@@ -185,6 +214,8 @@ export default class MyMusic_list extends wepy.page {
       'van-checkbox': '/styles/vant/checkbox/index',
       'van-radio': '/styles/vant/radio/index',
       'van-radio-group': '/styles/vant/radio-group/index',
+      "van-checkbox": "/styles/vant/checkbox/index",
+      "van-checkbox-group": "/styles/vant/checkbox-group/index",
       "van-toast": "/styles/vant/toast/index"
     }
   };
@@ -201,13 +232,16 @@ export default class MyMusic_list extends wepy.page {
     screenHeight:800,
     allSelect: false,
     playlist: [],
+    gequlist: [],
     playlists:[],
     favorites:[],
     activeNames: '1',
     addNum: 1,
     isDialogShow: false,
     is2DialogShow: false,
+    is3DialogShow: false,
     result: '',
+    checkboxResult:[],
     music_list: []
   };
 
@@ -218,6 +252,28 @@ export default class MyMusic_list extends wepy.page {
   };
 
   methods = {
+    onCheckboxChange(event){
+      console.log(event);
+      
+      this.checkboxResult = event.detail
+    },
+    toggle2(index) {
+      // debugger;
+      var item = this.gequlist[index]
+      item.isSelected = !item.isSelected
+      // console.log();
+      
+      // const checkbox = this.$wxpage.selectComponent('.checkboxes-'+index);
+      // console.log(checkbox);
+      // checkbox.toggle();
+    },
+    noop() {
+      // debugger;
+    },
+    onCellClick(item,event){
+      this.is3DialogShow = true
+      this.custom_gedanItems(item.sid)
+    },
     playSingleMusic(item){
       console.log(item);
       var httpUrl = "https://web.sound-genie.com/upload/music/"
@@ -229,7 +285,7 @@ export default class MyMusic_list extends wepy.page {
       this.$parent.globalData.backgroundAudioManager.src = httpUrl
       this.$parent.globalData.backgroundAudioManager.singer = item.artist
     },
-    addToPlayList(){
+    addToPlayList(i){
       var self = this
       var tempArray = []
       this.favorites.forEach(element => {
@@ -237,6 +293,15 @@ export default class MyMusic_list extends wepy.page {
         {
           console.log(element);
           tempArray.push(element.filesid)
+          element.isSelected = false
+        }
+      });
+      this.gequlist.forEach(element => {
+        if (element.isSelected == true) 
+        {
+          console.log(element);
+          tempArray.push(element.sid)
+          element.isSelected = false
         } 
       });
       let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_gedan_item&p=json'
@@ -248,14 +313,21 @@ export default class MyMusic_list extends wepy.page {
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
             "sid":this.result,
-            "type":1,
+            "type":i,
             "filesids":tempArray
           },  
           method: 'POST',   
           success: function(res){ 
-              Toast('向歌单添加歌曲成功！');
+              if (i == 1) 
+              {
+                Toast('向歌单添加歌曲成功！');
+              } 
+              else 
+              {
+                Toast('删除歌曲成功！');
+              }
               self.custom_refresh_gedan()
-              console.log(res);
+              self.$apply()
           }  
       });
     },
@@ -416,6 +488,7 @@ export default class MyMusic_list extends wepy.page {
     onDialogClose() {
       this.isDialogShow = false;
       this.is2DialogShow = false;
+      this.is3DialogShow = false;
       // this.music_list_name = ""
       // this.comment_name = ""
     },
@@ -479,6 +552,35 @@ export default class MyMusic_list extends wepy.page {
       this.isDialogShow = true;
     }
   };
+  custom_gedanItems(sid) {
+      let self = this
+      let url = 'https://web.sound-genie.com/client/index.php?m=bbc&c=micro&a=s_gedan_itemlist&p=json'
+      wepy.request({  
+          url: url, 
+          header: {
+            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+          }, 
+          data: {
+            "usersid":this.$parent.globalData.businessData.userInfo.sid,
+            "playlistsid":sid
+          },  
+          method: 'GET',   
+          success: function(res){ 
+              Toast.clear()
+              if (res.data.status == 1) 
+              {
+                self.gequlist = res.data.items
+                self.gequlist.forEach(element => {
+                  element.isSelected = false;
+                });
+                self.$apply()
+              } 
+              else 
+              {
+              }
+          }  
+      });
+  }
   custom_del_favlist(instance,item){
     console.log(item);
     var self = this
