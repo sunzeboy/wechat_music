@@ -13,6 +13,12 @@
       line-height: 30px !important;
       margin: 10% !important;
     }
+    .selected{
+      color:rgb(254, 91, 43) !important;
+    }
+    .normal{
+
+    }
 </style>
 
 <template>
@@ -27,7 +33,7 @@
     </van-tabs> -->
     <van-row>
       <van-col span="12" >
-        <van-button plain size="large" type="primary" custom-class="custom-btn" @click="dianMusic">点歌歌曲</van-button>
+        <van-button plain size="large" type="primary" custom-class="custom-btn" @click="dianMusic">点播歌曲</van-button>
       </van-col>
       <van-col span="12" >
         <van-button plain size="large" type="primary" custom-class="custom-btn" @click="playMusic">一键播放</van-button>
@@ -37,7 +43,7 @@
       <van-cell title="{{section.title}}" class="section">
       </van-cell>
       <block wx:for-items="{{section.items}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-          <van-cell title="{{item.title}}" size="large" label-class="label-widening" @click="playSingleMusic({{item}})">
+          <van-cell title="{{item.title}}" size="large" title-class="{{item.fileid == selectedFileid ? 'selected':'normal'}}" label-class="label-widening" @click="playSingleMusic({{item}})">
             <van-icon slot="right-icon" name="{{item.isFavorite ? 'like' : 'like-o'}}" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap.stop="like({{item}},{{sec}},{{index}})"/>
         </van-cell>
       </block>
@@ -77,6 +83,7 @@
         screenHeight:800,
         screenWidth:400,
         active:-1,
+        selectedFileid:0,
         shopsid:''
     }
 
@@ -120,7 +127,7 @@
           url: url, 
           header: {
             // "Cookie":"PHPSESSID="+wepy.getStorageSync('sessionid'),
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
           }, 
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
@@ -155,6 +162,7 @@
         this.$parent.globalData.playlist = this.playlist
         this.$parent.$pages['/pages/music_list'].data.playlist = this.playlist
         this.$parent.globalData.custom_play()
+        // this.selectedFileid = this.playlist[0].items[0].fileid
         Toast('设置为播放列表成功！')
         
       }
@@ -171,7 +179,7 @@
       wepy.request({
         url: url,
         header: {
-          "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+          "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
         },
         data: {},
         method: 'GET',
@@ -188,7 +196,7 @@
       wepy.request({  
         url: url,  
         header: {
-          "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+          "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
         },
         data: {
           "shopsid":options.shopsid
@@ -197,20 +205,8 @@
         success: function(res){ 
           console.log(res);
           var httpUrl = "https://web.sound-genie.com/upload/music/"
-          let fileid = res.data.fileid
-          let a = fileid.substring(0,2)
-          let b = fileid.substring(2,4)
-          httpUrl = httpUrl + a + '/' + b + '/' + fileid + '.mp3'
-          if (self.$parent.globalData.backgroundAudioManager.src == httpUrl) 
-          {
-            
-          }
-          else
-          {
-            self.$parent.globalData.backgroundAudioManager.title = '未知'
-            self.$parent.globalData.backgroundAudioManager.src = httpUrl
-            self.$parent.globalData.backgroundAudioManager.singer = '未知'
-          }
+          self.selectedFileid = res.data.fileid
+          // self.selectedFileid = "15ad300da4e8c882b90b4ee798bf51c6"
           var playlist = res.data.playlist
           var addlist = res.data.addlist
           self.shopInfo = res.data.shopInfo
@@ -246,6 +242,22 @@
                 {
                   element.isFavorite = false
                 }
+                if (element.fileid == self.selectedFileid) 
+                {
+                  let a = self.selectedFileid.substring(0,2)
+                  let b = self.selectedFileid.substring(2,4)
+                  httpUrl = httpUrl + a + '/' + b + '/' + self.selectedFileid + '.mp3'
+                  if (self.$parent.globalData.backgroundAudioManager.src == httpUrl) 
+                  {
+                    
+                  }
+                  else
+                  {
+                    self.$parent.globalData.backgroundAudioManager.title = element.title
+                    self.$parent.globalData.backgroundAudioManager.src = httpUrl
+                    self.$parent.globalData.backgroundAudioManager.singer = element.artist
+                  }
+                }
               }
             }
             console.log('--------------');
@@ -254,6 +266,23 @@
           }
         }  
       });
+    }
+    custom_calculate_fileid(){
+      if (this.$parent.globalData.backgroundAudioManager.src) 
+      {
+        for (let i = 0; i < this.playlist.sections.length; i++) 
+        {
+          const sections = this.playlist.sections[i];
+          for (let j = 0; j < sections.items.length; j++) 
+          {
+            const element = sections.items[j];
+            if (this.$parent.globalData.backgroundAudioManager.src.indexOf(element.fileid) != -1) 
+            {
+              this.selectedFileid = element.fileid
+            }
+          }
+        }
+      }
     }
     onShow() {
       console.log('this.active'+this.active);
@@ -272,6 +301,10 @@
               console.log(self.screenWidth);
               self.$apply()
           }
+      })
+      this.$parent.globalData.backgroundAudioManager.onPlay(()=>{
+        self.custom_calculate_fileid()
+        self.$apply()
       })
     }
   }

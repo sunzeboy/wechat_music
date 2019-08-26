@@ -64,7 +64,7 @@
         wepy.request({
           url: 'http://medlinkfamily.cn/sysex/index.php?m=wechat&c=interfaces&a=checkVerifyCode&p=json', 
           header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
           },
           data: {
             phone: this.phoneNum,
@@ -85,7 +85,7 @@
         wepy.request({
           url: 'http://medlinkfamily.cn/sysex/index.php?m=wechat&c=interfaces&a=getVerCode&p=json', 
           header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
           },
           data: {
             phone: this.phoneNum
@@ -117,7 +117,7 @@
             wepy.request({  
                 url: 'https://api.weixin.qq.com/sns/jscode2session?appid='+'wxb59da13859d938d4'+'&secret='+'b332504a57b56101a75f22779284ad6c'+'&js_code='+res.code+'&grant_type=authorization_code',  
                 header: {
-                  "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+                  "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
                 },
                 data: {},  
                 method: 'GET', // OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT  

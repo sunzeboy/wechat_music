@@ -58,7 +58,7 @@
         border="{{ false }}"
         bind:change="typePhone"
       />
-      <van-checkbox value="{{ isNeedSMS }}" custom-class="sms-checkbox" bind:change="onSMSChange">短信通知</van-checkbox>
+      <van-checkbox value="{{ isNeedSMS }}" custom-class="sms-checkbox" bind:change="onSMSChange">通知对方</van-checkbox>
         <van-cell title="请选择通知时间" bind:click="typeNotifyTime" value="{{ notifyTimeDesc }}" />
       <p style="color: red;">点播歌曲需要花费10点积分</p>
     </van-cell-group>
@@ -345,7 +345,7 @@
       wepy.request({
         url: url,
         header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
         },
         data: {},
         method: 'GET',
@@ -365,7 +365,7 @@
       wepy.request({
         url: url,
         header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
         },
         data: {},
         method: 'GET',
@@ -394,7 +394,7 @@
       wepy.request({
         url: url,
         header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
         },
         data: {
           'shopsid':this.$parent.globalData.current_shopsid,

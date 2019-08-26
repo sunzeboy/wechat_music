@@ -333,7 +333,7 @@
           url: url,  
           header: {
             // "Cookie":"PHPSESSID="+wepy.getStorageSync('sessionid'),
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
           },
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
@@ -360,7 +360,7 @@
           url: url,  
           header: {
             // "Cookie":"PHPSESSID="+wepy.getStorageSync('sessionid'),
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
           },
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
@@ -463,7 +463,7 @@
           url: url,  
           header: {
             // "Cookie":"PHPSESSID="+wepy.getStorageSync('sessionid'),
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
           },
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
@@ -474,7 +474,7 @@
           method: 'POST',   
           success: function(res){ 
               console.log(res);
-              Toast('上传log成功！');
+              // Toast('上传log成功！');
           }  
       });
     }
@@ -621,7 +621,7 @@
         url: url,
         header: {
           // "Cookie":"PHPSESSID="+wepy.getStorageSync('sessionid'),
-          "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+          "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
         },
         data: {},
         method: 'GET',
@@ -683,6 +683,12 @@
       this.backgroundAudioManager.onTimeUpdate(()=>{
         self.duration = self.backgroundAudioManager.duration
         self.currentTime = self.backgroundAudioManager.currentTime
+        setTimeout(() => {
+          if (self.is_play == false) 
+          {
+            self.is_play = true
+          }
+        }, 500);
         self.$apply()
       })
       this.backgroundAudioManager.onStop(()=>{
@@ -699,6 +705,11 @@
         console.log('onPlay');
         self.is_play = true
         self.$apply()
+      })
+      this.backgroundAudioManager.onWaiting(()=>{
+        console.log('onWaiting');
+        // self.is_play = false
+        // self.$apply()
       })
     }
     onShow() {
@@ -743,7 +754,7 @@
     wepy.request({  
         url: url,  
         header: {
-          "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+          "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
         },
         data: {},  
         method: 'POST',   
@@ -760,7 +771,7 @@
         url: url,  
         header: {
           // "Cookie":"PHPSESSID="+wepy.getStorageSync('sessionid'),
-          "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+          "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
         },
         data: {},  
         method: 'GET',   

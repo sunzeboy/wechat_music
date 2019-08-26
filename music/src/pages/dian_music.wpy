@@ -8,6 +8,9 @@
       margin-top: 5%;
       width: 90% !important;
     }
+    // .notify-time-title{
+    //   width: 80px !important;
+    // }
 </style>
 
 <template>
@@ -25,17 +28,17 @@
         <van-button slot="button" size="small" type="primary" @tap="selectMusic">选择歌曲</van-button>
       </van-field>
       
-      <van-checkbox value="{{ isNeedSMS }}" custom-class="sms-checkbox" checked-color="#FB5A26" bind:change="onSMSChange">短信通知</van-checkbox>
+      <van-checkbox value="{{ isNeedSMS }}" custom-class="sms-checkbox" checked-color="#FB5A26" bind:change="onSMSChange">通知对方</van-checkbox>
       <div wx:if="{{ isNeedSMS }}">
         <van-field
           value="{{ phone }}"
-          label="手机号"
+          label="手机号码"
           placeholder="请输入手机号"
           error-message="{{errorMessagePhone}}"
           border="{{ false }}"
           bind:change="typePhone"
         />
-        <van-cell title="请选择通知时间" bind:click="typeNotifyTime" value="{{ notifyTimeDesc }}" />
+        <van-cell title="通知时间" bind:click="typeNotifyTime" title-class="notify-time-title" value="{{ notifyTimeDesc }}" />
       </div>
       
       <p style="color: red;">点播歌曲需要花费10点积分</p>
@@ -257,7 +260,7 @@
       wepy.request({
         url: url,
         header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
         },
         data: {},
         method: 'GET',
@@ -277,7 +280,7 @@
       wepy.request({
         url: url,
         header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
         },
         data: {},
         method: 'GET',
@@ -310,7 +313,7 @@
       wepy.request({
         url: url,
         header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
         },
         data: {
           'shopsid':this.$parent.globalData.current_shopsid,

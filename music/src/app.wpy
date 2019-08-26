@@ -364,7 +364,7 @@ export default class extends wepy.app {
     wepy.request({  
         url: url,  
         header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
         },
         data: {},  
         method: 'POST',   
@@ -382,7 +382,7 @@ export default class extends wepy.app {
     wepy.request({  
         url: url,  
         header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
         },
         data: {},  
         method: 'GET',   

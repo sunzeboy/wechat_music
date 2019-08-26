@@ -1,10 +1,15 @@
 <style lang="less">
-    
+    .selected{
+      color:rgb(254, 91, 43) !important;
+    }
+    .normal{
+
+    }
 </style>
 
 <template>
     <block wx:for-items="{{musiclist.items}}" wx:for-index="index" wx:key="index" wx:for-item="item">
-      <van-cell title="{{item.title}}" custom-class="{{index == selectedIndex ? 'selected':'normal'}}"  size="large"   @tap="selectMusic({{item}})" >
+      <van-cell title="{{item.title}}" custom-class="{{item.fileid == selectedFileid ? 'selected':'normal'}}"  size="large"   @tap="selectMusic({{item}})" >
         <van-icon slot="right-icon" name="play" style="margin-left:25px;" class="custom-icon" color="#FB5A26" size="20px" @tap.stop="playSingleMusic({{item}})"/>
       </van-cell>
     </block>
@@ -43,8 +48,8 @@
 
 
     data = {
+      selectedFileid:0,
       musiclist:[]
-      
     }
 
     computed = {
@@ -62,6 +67,7 @@
         this.$parent.globalData.backgroundAudioManager.title = item.title
         this.$parent.globalData.backgroundAudioManager.src = httpUrl
         this.$parent.globalData.backgroundAudioManager.singer = item.artist
+        this.selectedFileid = fileid
       },
       selectMusic(item){
         this.$parent.globalData.dian_music = item
@@ -70,7 +76,6 @@
         })
       }
     }
-    
     events = {
       
     }

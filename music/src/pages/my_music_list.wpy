@@ -26,6 +26,12 @@
 .label-widening{
   width: 99%;
 }
+.selected{
+  color:rgb(254, 91, 43) !important;
+}
+.normal{
+
+}
 </style>
 
 <template>
@@ -51,7 +57,7 @@
               <scroll-view scroll-y style="height: {{screenHeight-90}}rpx;">
                 <block wx:for-items="{{favorites}}" wx:for-index="index" wx:key="index" wx:for-item="item">
                     <van-swipe-cell id="swipe-cell" right-width="{{ 65 }}" left-width="{{ 65 }}" async-close bind:close="onCellClose(2,{{item}})" bind:click="playSingleMusic({{item}})">
-                        <view slot="left" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #fff;" >
+                        <view slot="left" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 48px;color: #fff;text-align: center;background-color: #fff;" >
                             <van-checkbox
                             style="display: inline-block;"
                             value="{{ item.isSelected }}"
@@ -61,14 +67,14 @@
                             </van-checkbox>
                         </view>
                         <van-cell-group>
-                            <van-cell size="large" label-class="label-widening" >
+                            <van-cell size="large" title-class="{{index == selectedIndex ? 'selected':'normal'}}" label-class="label-widening" >
                             <view slot="title">
                             <view class="van-cell-text">{{item.title}}</view>
-                            <van-tag wx:if="{{index == selectedIndex}}" type="danger">播放中...</van-tag>
+                            <!-- <van-tag wx:if="{{index == selectedIndex}}" type="danger">播放中...</van-tag> -->
                             </view>
                         </van-cell>
                         </van-cell-group>
-                        <view slot="right" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 69px;color: #fff;text-align: center;background-color: #f44;" >删除</view>
+                        <view slot="right" style="display: inline-block;width: 65px;height: 100%;font-size: 15px;line-height: 48px;color: #fff;text-align: center;background-color: #f44;" >删除</view>
                     </van-swipe-cell>
                 </block>
               </scroll-view>
@@ -241,6 +247,7 @@ export default class MyMusic_list extends wepy.page {
     is2DialogShow: false,
     is3DialogShow: false,
     result: '',
+    selectedIndex:-1,
     checkboxResult:[],
     music_list: []
   };
@@ -253,8 +260,6 @@ export default class MyMusic_list extends wepy.page {
 
   methods = {
     onCheckboxChange(event){
-      console.log(event);
-      
       this.checkboxResult = event.detail
     },
     toggle2(index) {
@@ -272,6 +277,7 @@ export default class MyMusic_list extends wepy.page {
     },
     onCellClick(item,event){
       this.is3DialogShow = true
+      this.result = item.sid;
       this.custom_gedanItems(item.sid)
     },
     playSingleMusic(item){
@@ -308,7 +314,7 @@ export default class MyMusic_list extends wepy.page {
       wepy.request({  
           url: url, 
           header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
           }, 
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
@@ -383,7 +389,7 @@ export default class MyMusic_list extends wepy.page {
       wepy.request({  
           url: url, 
           header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
           }, 
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
@@ -514,7 +520,7 @@ export default class MyMusic_list extends wepy.page {
       wepy.request({  
           url: url, 
           header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
           }, 
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
@@ -558,7 +564,7 @@ export default class MyMusic_list extends wepy.page {
       wepy.request({  
           url: url, 
           header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
           }, 
           data: {
             "usersid":this.$parent.globalData.businessData.userInfo.sid,
@@ -588,7 +594,7 @@ export default class MyMusic_list extends wepy.page {
     wepy.request({  
         url: url, 
         header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
         }, 
         data: {
           "usersid":this.$parent.globalData.businessData.userInfo.sid,
@@ -616,7 +622,7 @@ export default class MyMusic_list extends wepy.page {
     wepy.request({  
         url: url,  
         header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
         },
         data: {
           "usersid":this.$parent.globalData.businessData.userInfo.sid,
@@ -655,7 +661,7 @@ export default class MyMusic_list extends wepy.page {
     wepy.request({
       url: url,
       header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
       },
       data: {},
       method: 'GET',
@@ -673,7 +679,7 @@ export default class MyMusic_list extends wepy.page {
     wepy.request({
       url: url,
       header: {
-            "Cookie":"PHPSESSID="+self.$parent.globalData.sessionid
+            "Cookie":"PHPSESSID="+this.$parent.globalData.sessionid
       },
       data: {},
       method: 'GET',
@@ -683,6 +689,23 @@ export default class MyMusic_list extends wepy.page {
       }
     });
   }
+  custom_calculate_index(){
+    if (this.$parent.globalData.backgroundAudioManager.src) 
+    {
+      for (let index = 0; index < this.favorites.length; index++) 
+      {
+        const element = this.favorites[index];
+        if (this.$parent.globalData.backgroundAudioManager.src.indexOf(element.fileid) != -1) 
+        {
+          this.selectedIndex = index
+        }
+      }
+    }
+    else
+    {
+      this.selectedIndex = -1
+    }
+  }
   events = {};
   onChange(e) {
     this.activeNames = e.detail;
@@ -691,13 +714,17 @@ export default class MyMusic_list extends wepy.page {
     let self = this;
     wepy.getSystemInfo({
         success(res){
-            console.log("screenHeight:"+res.windowHeight);
-            console.log("screenWidth:"+res.windowWidth);
-            self.screenHeight = (res.windowHeight-44)/(res.windowWidth/750)
-            self.$apply()
+          console.log("screenHeight:"+res.windowHeight);
+          console.log("screenWidth:"+res.windowWidth);
+          self.screenHeight = (res.windowHeight-44)/(res.windowWidth/750)
+          self.$apply()
         }
     })
     
+    this.$parent.globalData.backgroundAudioManager.onPlay(()=>{
+      self.custom_calculate_index()
+      self.$apply()
+    })
   }
   onShow(){
     this.custom_refresh_gedan()
